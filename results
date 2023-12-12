@@ -1,0 +1,1953 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+# Load the data
+df = pd.read_excel('/Documents/DataAssessement.xlsx')
+# Checking for any missing values and the data types of the columns.
+# This will help me understand if any data cleaning is required.
+
+# Check for missing values and data types
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1746 entries, 0 to 1745
+Data columns (total 15 columns):
+ #   Column                      Non-Null Count  Dtype  
+---  ------                      --------------  -----  
+ 0   Department                  1746 non-null   object 
+ 1   Class                       1746 non-null   object 
+ 2   Size                        1688 non-null   object 
+ 3   Inventory Units             1746 non-null   int64  
+ 4   Full Price Inventory Units  1746 non-null   int64  
+ 5   Markdown Inventory Units    1746 non-null   int64  
+ 6   Inventory Value             1746 non-null   float64
+ 7   Full Price Inventory Value  1746 non-null   float64
+ 8   Markdown Inventory Value    1746 non-null   float64
+ 9   Units Sold                  1746 non-null   int64  
+ 10  Full Price Units Sold       1746 non-null   int64  
+ 11  Markdown Units Sold         1746 non-null   int64  
+ 12  Sales                       1746 non-null   float64
+ 13  Full Price Sales            1746 non-null   float64
+ 14  Markdown Sales              1746 non-null   float64
+dtypes: float64(6), int64(6), object(3)
+memory usage: 204.7+ KB
+The dataset consists of 1746 rows. Most columns don't have any missing values, but the Size column has some missing values as it has only 1688 non-null entries.
+
+# Display rows with missing 'Size' values
+df[df['Size'].isna()]
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	Full Price Units Sold	Markdown Units Sold	Sales	Full Price Sales	Markdown Sales
+547	Handbags/Accessories	Backpack	NaN	1091	1022	69	47781.04	44545.28	3235.76	0	0	0	0.0	0.0	0.0
+554	Handbags/Accessories	Evening/Clutch	NaN	2004	1431	573	73085.49	60043.14	13042.35	0	0	0	0.0	0.0	0.0
+555	Handbags/Accessories	Hobos	NaN	2027	1866	161	107773.09	87291.09	20482.00	0	0	0	0.0	0.0	0.0
+556	Handbags/Accessories	Italy	NaN	58	58	0	6509.43	6509.43	0.00	0	0	0	0.0	0.0	0.0
+557	Handbags/Accessories	Luxury	NaN	5	5	0	2999.95	2999.95	0.00	0	0	0	0.0	0.0	0.0
+569	Handbags/Accessories	Messenger/Xbody	NaN	5358	4843	515	235683.83	219197.23	16486.60	0	0	0	0.0	0.0	0.0
+570	Handbags/Accessories	Satchels	NaN	7737	6368	1369	306853.17	268935.57	37917.60	0	0	0	0.0	0.0	0.0
+571	Handbags/Accessories	SLG	NaN	3810	2648	1162	70851.52	55903.52	14948.00	0	0	0	0.0	0.0	0.0
+572	Handbags/Accessories	Totes	NaN	5445	4430	1015	210485.21	188231.96	22253.25	0	0	0	0.0	0.0	0.0
+1097	Men & Womens Athle	Walking	NaN	122	0	122	3897.60	0.00	3897.60	0	0	0	0.0	0.0	0.0
+1307	Toys & Books	Arts and Crafts	NaN	1139	1139	0	15077.71	15077.71	0.00	0	0	0	0.0	0.0	0.0
+1308	Toys & Books	Baby and Infant Toys	NaN	388	388	0	5901.37	5901.37	0.00	0	0	0	0.0	0.0	0.0
+1309	Toys & Books	Outdoor Rec	NaN	8961	7132	1829	132392.19	100919.19	31473.00	0	0	0	0.0	0.0	0.0
+1310	Toys & Books	Play Pretend	NaN	7045	6323	722	142629.68	129675.68	12954.00	0	0	0	0.0	0.0	0.0
+1311	Toys & Books	Plush	NaN	1819	1819	0	19959.92	19959.92	0.00	0	0	0	0.0	0.0	0.0
+1312	Toys & Books	Toys and Games	NaN	949	949	0	17545.57	17545.57	0.00	0	0	0	0.0	0.0	0.0
+1313	Toys & Books	Vehicles	NaN	55	55	0	485.91	485.91	0.00	0	0	0	0.0	0.0	0.0
+1320	Mens Accessories/Giftware	Gifts	NaN	158	158	0	1262.02	1262.02	0.00	0	0	0	0.0	0.0	0.0
+1389	Bath Shop/Textiles	Rugs	NaN	379	379	0	5591.77	5591.77	0.00	0	0	0	0.0	0.0	0.0
+1402	Bath Shop/Textiles	Towels	NaN	654	654	0	32673.46	32673.46	0.00	0	0	0	0.0	0.0	0.0
+1473	Decorative Textiles	Outdoor Cushions	NaN	3598	3419	179	139629.11	132640.31	6988.80	0	0	0	0.0	0.0	0.0
+1691	Children's Accessories	Outdoor	NaN	3791	3791	0	55629.09	55629.09	0.00	0	0	0	0.0	0.0	0.0
+1692	Bath Body Hair	Bar Soap	NaN	2050	2050	0	10453.10	10453.10	0.00	0	0	0	0.0	0.0	0.0
+1693	Bath Body Hair	Body	NaN	29508	27682	1826	207995.08	195565.88	12429.20	0	0	0	0.0	0.0	0.0
+1694	Bath Body Hair	Essential Oils	NaN	115	115	0	685.26	685.26	0.00	0	0	0	0.0	0.0	0.0
+1695	Bath Body Hair	Liquid Soap	NaN	16153	15827	326	96299.05	92990.73	3308.32	0	0	0	0.0	0.0	0.0
+1696	Bath Body Hair	Natural Organic Body	NaN	575	0	575	2873.00	0.00	2873.00	0	0	0	0.0	0.0	0.0
+1697	Bath Body Hair	Prestige Body	NaN	3478	3392	86	62903.09	56639.09	6264.00	0	0	0	0.0	0.0	0.0
+1698	Bath Body Hair	Prestige Hair Care HIST	NaN	243	243	0	3150.08	3150.08	0.00	0	0	0	0.0	0.0	0.0
+1700	Luggage/Accessories	Backpacks	NaN	49	49	0	3277.52	3277.52	0.00	0	0	0	0.0	0.0	0.0
+1701	Luggage/Accessories	Casual Scarves	NaN	773	699	74	108359.01	104699.01	3660.00	0	0	0	0.0	0.0	0.0
+1704	Luggage/Accessories	CW Ladies Scarves	NaN	23	0	23	112.50	0.00	112.50	0	0	0	0.0	0.0	0.0
+1705	Luggage/Accessories	Hard Side Suitcases	NaN	10126	9476	650	1169537.24	1054065.24	115472.00	0	0	0	0.0	0.0	0.0
+1706	Table Top	Drinkware	NaN	280	280	0	5977.20	5977.20	0.00	0	0	0	0.0	0.0	0.0
+1720	Seasonal Decorative	Candles	NaN	2080	2080	0	26259.30	26259.30	0.00	0	0	0	0.0	0.0	0.0
+1721	Seasonal Decorative	Easter	NaN	7853	0	7853	61398.15	0.00	61398.15	0	0	0	0.0	0.0	0.0
+1723	Home Furnishings	Pendant Lamps	NaN	908	433	475	38379.47	17311.67	21067.80	0	0	0	0.0	0.0	0.0
+1724	Home Furnishings	Seating	NaN	4672	3088	1584	1530209.60	1181905.12	348304.48	0	0	0	0.0	0.0	0.0
+1725	Home Furnishings	Table Lamps	NaN	2359	1540	819	170282.21	119504.61	50777.60	0	0	0	0.0	0.0	0.0
+1726	Home Furnishings	Tables	NaN	2655	1947	708	269200.54	206296.54	62904.00	0	0	0	0.0	0.0	0.0
+1728	Treatment / Color	Makeup	NaN	3195	3195	0	17441.56	17441.56	0.00	0	0	0	0.0	0.0	0.0
+1729	Treatment / Color	Men's Grooming	NaN	1786	1626	160	33937.74	32497.74	1440.00	0	0	0	0.0	0.0	0.0
+1730	Treatment / Color	Nail	NaN	8684	8588	96	54979.37	54690.77	288.60	0	0	0	0.0	0.0	0.0
+1731	Treatment / Color	Organic Makeup	NaN	69	69	0	478.12	478.12	0.00	0	0	0	0.0	0.0	0.0
+1732	Treatment / Color	Organic Treatment	NaN	862	380	482	7135.46	3759.71	3375.75	0	0	0	0.0	0.0	0.0
+1733	Treatment / Color	Prestige Makeup	NaN	60070	59150	920	897551.89	892212.10	5339.79	0	0	0	0.0	0.0	0.0
+1734	Treatment / Color	Prestige Treatment	NaN	39072	37095	1977	965385.26	933418.41	31966.85	0	0	0	0.0	0.0	0.0
+1735	Treatment / Color	Sun Treatment	NaN	5096	5096	0	46801.70	46801.70	0.00	0	0	0	0.0	0.0	0.0
+1736	Treatment / Color	Treatment	NaN	18816	18815	1	136036.05	136023.45	12.60	0	0	0	0.0	0.0	0.0
+1737	Fragrances	Men	NaN	2195	2195	0	40502.05	40502.05	0.00	0	0	0	0.0	0.0	0.0
+1738	Fragrances	Prestige	NaN	2447	2368	79	155475.48	141851.83	13623.65	0	0	0	0.0	0.0	0.0
+1739	Fragrances	Women	NaN	5160	5160	0	81944.40	81944.40	0.00	0	0	0	0.0	0.0	0.0
+1740	Haircare	Hair Appliances	NaN	654	261	393	21095.39	13472.39	7623.00	0	0	0	0.0	0.0	0.0
+1741	Haircare	Haircare	NaN	9090	6232	2858	89705.08	64560.48	25144.60	0	0	0	0.0	0.0	0.0
+1742	Haircare	Organic Haircare	NaN	481	481	0	18007.79	18007.79	0.00	0	0	0	0.0	0.0	0.0
+1743	Haircare	Prestige Haircare	NaN	1651	1651	0	69606.70	69606.70	0.00	0	0	0	0.0	0.0	0.0
+1744	Haircare	Salon Haircare	NaN	3786	3682	104	61330.98	60498.98	832.00	0	0	0	0.0	0.0	0.0
+1745	Haircare	Textured Haircare	NaN	1207	24	1183	5648.06	173.36	5474.70	0	0	0	0.0	0.0	0.0
+The items with missing Size values seem to belong to categories where size would not usually be a relevant characteristic (for example, 'Backpack', 'Outdoor Rec', 'Toys and Games', 'Candles', 'Table Lamps', etc.). Therefore, the missingness in this case is not random, but inherent to the type of product, and I won't be doing anything with those at the moment.
+
+# Making sure that the for 'full price' and 'markdown' columns add to the total columns, respectively.
+# For the purpose of this assignment, if there's any discrepancy I will fix, assuming that the total value comes only from 
+# full price items + markdown items. 
+
+
+# Inventory Units
+df['check_inventory_units'] = df['Full Price Inventory Units'] + df['Markdown Inventory Units']
+df['inventory_units_mismatch'] = df['Inventory Units'] != df['check_inventory_units']
+
+# Inventory Value
+df['check_inventory_value'] = df['Full Price Inventory Value'] + df['Markdown Inventory Value']
+df['inventory_value_mismatch'] = df['Inventory Value'] != df['check_inventory_value']
+
+# Units Sold
+df['check_units_sold'] = df['Full Price Units Sold'] + df['Markdown Units Sold']
+df['units_sold_mismatch'] = df['Units Sold'] != df['check_units_sold']
+
+# Sales
+df['check_sales'] = df['Full Price Sales'] + df['Markdown Sales']
+df['sales_mismatch'] = df['Sales'] != df['check_sales']
+
+# Find any rows where there is a mismatch
+mismatch_rows = df[df[['inventory_units_mismatch', 'inventory_value_mismatch', 'units_sold_mismatch', 'sales_mismatch']].any(axis=1)]
+
+# Correct the mismatches by replacing the values in the "Sales" column 
+# with the sum of the "Full Price Sales" and "Markdown Sales" columns where mismatches occur.
+df.loc[df['sales_mismatch'], 'Sales'] = df.loc[df['sales_mismatch'], 'check_sales']
+
+# Verify if the correction was successful
+df.loc[df.index.isin(mismatch_rows.index)][['Sales', 'check_sales', 'sales_mismatch']]
+Sales	check_sales	sales_mismatch
+44	2603.26	2603.26	True
+58	268.72	268.72	True
+73	343.16	343.16	True
+85	2431.49	2431.49	True
+86	6864.14	6864.14	True
+...	...	...	...
+1598	666.89	666.89	True
+1642	1332.21	1332.21	True
+1657	1542.89	1542.89	True
+1684	278.09	278.09	True
+1689	459.91	459.91	True
+117 rows × 3 columns
+
+# Making sure that if full price unit column or markdown unit column has a row with valeu 0, 
+# there's no full price inventory value or markdown inventory value, 
+# nor full price sales or markdown sales for that row, and set to 0 for the matter of this assignment. In real life, should be investigated.
+
+# Check for any rows where Full Price Inventory Units is 0 but Full Price Inventory Value or Full Price Sales is not 0
+full_price_mismatch = df[((df['Full Price Inventory Units'] == 0) & ((df['Full Price Inventory Value'] != 0) | (df['Full Price Sales'] != 0)))]
+
+# Check for any rows where Markdown Inventory Units is 0 but Markdown Inventory Value or Markdown Sales is not 0
+markdown_mismatch = df[((df['Markdown Inventory Units'] == 0) & ((df['Markdown Inventory Value'] != 0) | (df['Markdown Sales'] != 0)))]
+
+# Display rows with mismatches
+full_price_mismatch, markdown_mismatch
+
+# Set Full Price Inventory Value and Full Price Sales to 0 where Full Price Inventory Units is 0
+df.loc[df['Full Price Inventory Units'] == 0, ['Full Price Inventory Value', 'Full Price Sales']] = 0
+
+# Set Markdown Inventory Value and Markdown Sales to 0 where Markdown Inventory Units is 0
+df.loc[df['Markdown Inventory Units'] == 0, ['Markdown Inventory Value', 'Markdown Sales']] = 0
+
+# Verify if the correction was successful
+full_price_mismatch_after_correction = df.loc[full_price_mismatch.index, ['Full Price Inventory Units', 'Full Price Inventory Value', 'Full Price Sales']]
+markdown_mismatch_after_correction = df.loc[markdown_mismatch.index, ['Markdown Inventory Units', 'Markdown Inventory Value', 'Markdown Sales']]
+# Making sure that if 'unit sold' has a value of 0, there's no sales for that row
+
+# Check for any rows where Units Sold is 0 but Sales is not 0
+sales_mismatch = df[(df['Units Sold'] == 0) & (df['Sales'] != 0)]
+
+# Display rows with mismatches
+sales_mismatch
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+0 rows × 23 columns
+
+#Making sure that for all rows in the department and 
+#class columns the order of the words, neither if it is upper case or 
+#lower case, or spaces, if it is the same words, grouped the rows together having the 
+#same class and size. So, for instance 'Ladies Footwear' would be 
+#the same as 'Ladies footwear' or 'Ladies Footwear ' or any other variation.
+
+# Normalize the 'Department' and 'Class' columns by making them lowercase and removing leading and trailing spaces
+df['Department'] = df['Department'].str.lower().str.strip()
+df['Class'] = df['Class'].str.lower().str.strip()
+
+# Display the first few rows of the dataframe to confirm the changes
+df.head()
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+0	casual wear	denim	24	64	64	0	1327.62	1327.62	0.0	5	...	114.95	0.0	64	False	1327.62	False	5	False	114.95	False
+1	casual wear	denim	24X28	21	21	0	517.29	517.29	0.0	2	...	28.74	0.0	21	False	517.29	False	2	False	28.74	False
+2	casual wear	denim	24x30	73	68	5	1618.08	1518.08	100.0	4	...	0.00	75.0	73	False	1618.08	False	4	False	75.00	False
+3	casual wear	denim	25	68	68	0	1495.58	1495.58	0.0	1	...	18.99	0.0	68	False	1495.58	False	1	False	18.99	False
+4	casual wear	denim	25x28	64	64	0	1599.36	1599.36	0.0	2	...	49.98	0.0	64	False	1599.36	False	2	False	49.98	False
+5 rows × 23 columns
+
+# Remove 'in.' in the 'Size' column for the 'Bath Shop/Textiles' department
+df.loc[df['Department'] == 'bath shop/textiles', 'Size'] = df.loc[df['Department'] == 'bath shop/textiles', 'Size'].str.replace('in.', '', regex=False)
+
+# Display rows in the 'Bath Shop/Textiles' department to confirm the change
+df[df['Department'] == 'bath shop/textiles']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+1387	bath shop/textiles	napkins	OS	37	0	37	183.75	0.00	183.75	33	...	0.00	162.75	37	False	183.75	False	33	False	162.75	False
+1388	bath shop/textiles	placemats	OS	376	376	0	3838.35	3838.35	0.00	60	...	650.11	0.00	376	False	3838.35	False	60	False	650.11	False
+1389	bath shop/textiles	rugs	NaN	379	379	0	5591.77	5591.77	0.00	0	...	0.00	0.00	379	False	5591.77	False	0	False	0.00	False
+1390	bath shop/textiles	seasonal table linens	13x19	120	0	120	837.90	0.00	837.90	18	...	0.00	119.70	120	False	837.90	False	18	False	119.70	False
+1391	bath shop/textiles	seasonal table linens	14x48	80	0	80	805.20	0.00	805.20	11	...	0.00	116.60	80	False	805.20	False	11	False	116.60	False
+1392	bath shop/textiles	seasonal table linens	14x72	924	0	924	9446.40	0.00	9446.40	17	...	0.00	162.00	924	False	9446.40	False	17	False	162.00	False
+1393	bath shop/textiles	seasonal table linens	16x90	13	0	13	151.80	0.00	151.80	1	...	0.00	6.60	13	False	151.80	False	1	False	6.60	False
+1394	bath shop/textiles	seasonal table linens	18	16	0	16	240.00	0.00	240.00	2	...	0.00	24.00	16	False	240.00	False	2	False	24.00	False
+1395	bath shop/textiles	seasonal table linens	18x28	147	0	147	1080.00	0.00	1080.00	41	...	0.00	300.00	147	False	1080.00	False	41	False	300.00	False
+1396	bath shop/textiles	seasonal table linens	5x8	198	0	198	1184.40	0.00	1184.40	10	...	0.00	58.80	198	False	1184.40	False	10	False	58.80	False
+1397	bath shop/textiles	seasonal table linens	84x10.5x9	167	0	167	1995.00	0.00	1995.00	2	...	0.00	22.80	167	False	1995.00	False	2	False	22.80	False
+1398	bath shop/textiles	seasonal table linens	OS	2	0	2	18.50	0.00	18.50	2	...	0.00	18.50	2	False	18.50	False	2	False	18.50	False
+1399	bath shop/textiles	shower	20x30	363	363	0	4705.63	4705.63	0.00	206	...	2673.99	0.00	363	False	4705.63	False	206	False	2673.99	False
+1400	bath shop/textiles	shower	OS	154	154	0	2306.96	2306.96	0.00	3	...	40.47	0.00	154	False	2306.96	False	3	False	40.47	False
+1401	bath shop/textiles	table runners	14x48	25	25	0	321.50	321.50	0.00	3	...	29.23	0.00	25	False	321.50	False	3	False	29.23	False
+1402	bath shop/textiles	towels	NaN	654	654	0	32673.46	32673.46	0.00	0	...	0.00	0.00	654	False	32673.46	False	0	False	0.00	False
+1403	bath shop/textiles	towels	13x13	45	45	0	355.95	355.95	0.00	14	...	105.47	0.00	45	False	355.95	False	14	False	105.47	False
+1404	bath shop/textiles	towels	20x30	170	170	0	1698.30	1698.30	0.00	28	...	271.73	0.00	170	False	1698.30	False	28	False	271.73	False
+1405	bath shop/textiles	towels	28x54	112	112	0	4478.88	4478.88	0.00	13	...	503.87	0.00	112	False	4478.88	False	13	False	503.87	False
+1406	bath shop/textiles	towels	30x30	54	54	0	2159.46	2159.46	0.00	5	...	179.96	0.00	54	False	2159.46	False	5	False	179.96	False
+1407	bath shop/textiles	towels	30x56	465	465	0	16249.36	16249.36	0.00	13	...	440.87	0.00	465	False	16249.36	False	13	False	440.87	False
+1408	bath shop/textiles	towels	35x70	221	221	0	8817.80	8817.80	0.00	7	...	251.94	0.00	221	False	8817.80	False	7	False	251.94	False
+1409	bath shop/textiles	towels	Bath Towel	163	163	0	1627.37	1627.37	0.00	6	...	53.95	0.00	163	False	1627.37	False	6	False	53.95	False
+1410	bath shop/textiles	towels	Hand Towel	266	266	0	1866.34	1866.34	0.00	36	...	281.04	0.00	266	False	1866.34	False	36	False	281.04	False
+1411	bath shop/textiles	towels	OS	555	555	0	20250.70	20250.70	0.00	81	...	2099.20	0.00	555	False	20250.70	False	81	False	2099.20	False
+25 rows × 23 columns
+
+# Making sure that for all rows in the 'size' column the order of the words, if any , don't matter, neither 
+#if it is upper case or lower case, if it is the same words, or words and numbers together are the same, 
+# group the rows together. So, for instance, 65CM is the same as 65cm, Full/Queen is the same as Queen/Full. 
+
+# Normalize the 'Size' column by making it lowercase and sorting the words in each size
+# Handle non-string values by converting them to strings first
+df['Size'] = df['Size'].astype(str).str.lower().apply(lambda x: '/'.join(sorted(x.split('/'))))
+# For the 'Activewear' department I changed in the size column the values 
+#'LL' to 'XL', 'SM' to 'S', 'LG' to 'L', 'MD' to 'M', 'XSS' to 'XS/S', 'some assumptions were made here'
+# After that, I grouped them with the ones that have the same size in the same department and the same class. So, for instance,
+#After changing SM to S, they are grouped with the other 'S' sizes in the same department in the same class for that department
+
+# Define a mapping dictionary
+size_mapping = {
+    'll': 'xl',
+    'sm': 's',
+    'lg': 'l',
+    'md': 'm',
+    'xss': 'xs/s'
+}
+
+# Apply the mapping to the 'Size' column for the 'Activewear' department
+df.loc[df['Department'] == 'activewear', 'Size'] = df.loc[df['Department'] == 'activewear', 'Size'].map(size_mapping).fillna(df['Size'])
+
+# Display rows in the 'Activewear' department to confirm the change
+df[df['Department'] == 'activewear']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+462	activewear	bra tops	1x	12	12	0	202.18	202.18	0.0	2	...	23.79	0.0	12	False	202.18	False	2	False	23.79	False
+463	activewear	bra tops	32a/b	5	5	0	122.45	122.45	0.0	0	...	0.00	0.0	5	False	122.45	False	0	False	0.00	False
+464	activewear	bra tops	32c/d	20	5	15	412.21	106.21	306.0	10	...	63.72	136.0	20	False	412.21	False	10	False	199.72	False
+465	activewear	bra tops	l	849	812	37	14409.29	14061.89	347.4	186	...	2949.12	160.2	849	False	14409.29	False	186	False	3109.32	True
+466	activewear	bra tops	l	254	39	215	2816.61	584.61	2232.0	48	...	224.85	363.0	254	False	2816.61	False	48	False	587.85	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+542	activewear	tops	s	2831	2578	253	44508.32	40887.82	3620.5	446	...	5849.84	473.2	2831	False	44508.32	False	446	False	6323.04	False
+543	activewear	tops	s	159	159	0	2057.62	2057.62	0.0	17	...	214.34	0.0	159	False	2057.62	False	17	False	214.34	False
+544	activewear	tops	xl	1594	1471	123	24580.19	23587.99	992.2	400	...	5392.99	354.2	1594	False	24580.19	False	400	False	5747.19	False
+545	activewear	tops	xs	1381	1021	360	20092.39	16512.59	3579.8	122	...	1323.43	235.2	1381	False	20092.39	False	122	False	1558.63	False
+546	activewear	tops	xxl	256	245	11	3793.30	3740.80	52.5	74	...	953.12	52.5	256	False	3793.30	False	74	False	1005.62	False
+85 rows × 23 columns
+
+#For 'Casual Wear' department I changed in the size column change values that 
+#have the symbol '/' to 'x'. After that, I grouped them with the ones that have the same size 
+#in the same department and the same class. So for instance, if there is 26/32 value, it will 
+#become '26x32' and it will be grouped with the rest '26x32' for the same departement and the same class.
+
+# Replace '/' with 'x' in the 'Size' column for the 'Casual Wear' department
+df.loc[df['Department'] == 'casual wear', 'Size'] = df.loc[df['Department'] == 'casual wear', 'Size'].str.replace('/', 'x')
+
+# Display rows in the 'Casual Wear' department to confirm the change
+df[df['Department'] == 'casual wear']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+0	casual wear	denim	24	64	64	0	1327.62	1327.62	0.00	5	...	114.95	0.00	64	False	1327.62	False	5	False	114.95	False
+1	casual wear	denim	24x28	21	21	0	517.29	517.29	0.00	2	...	28.74	0.00	21	False	517.29	False	2	False	28.74	False
+2	casual wear	denim	24x30	73	68	5	1618.08	1518.08	100.00	4	...	0.00	75.00	73	False	1618.08	False	4	False	75.00	False
+3	casual wear	denim	25	68	68	0	1495.58	1495.58	0.00	1	...	18.99	0.00	68	False	1495.58	False	1	False	18.99	False
+4	casual wear	denim	25x28	64	64	0	1599.36	1599.36	0.00	2	...	49.98	0.00	64	False	1599.36	False	2	False	49.98	False
+5	casual wear	denim	25x30	31	31	0	759.70	759.70	0.00	0	...	0.00	0.00	31	False	759.70	False	0	False	0.00	False
+6	casual wear	denim	26	100	100	0	2247.00	2247.00	0.00	6	...	131.94	0.00	100	False	2247.00	False	6	False	131.94	False
+7	casual wear	denim	26x30	1	1	0	16.99	16.99	0.00	1	...	16.99	0.00	1	False	16.99	False	1	False	16.99	False
+8	casual wear	denim	26x28	45	45	0	1119.55	1119.55	0.00	1	...	19.99	0.00	45	False	1119.55	False	1	False	19.99	False
+9	casual wear	denim	26x30	74	35	39	1475.65	707.65	768.00	9	...	0.00	168.00	74	False	1475.65	False	9	False	168.00	False
+10	casual wear	denim	26x32	31	31	0	759.70	759.70	0.00	1	...	19.99	0.00	31	False	759.70	False	1	False	19.99	False
+11	casual wear	denim	27	124	124	0	2739.27	2739.27	0.00	8	...	173.93	0.00	124	False	2739.27	False	8	False	173.93	False
+12	casual wear	denim	27x30	16	16	0	259.95	259.95	0.00	6	...	86.65	0.00	16	False	259.95	False	6	False	86.65	False
+13	casual wear	denim	27x28	136	136	0	3381.15	3381.15	0.00	14	...	329.87	0.00	136	False	3381.15	False	14	False	329.87	False
+14	casual wear	denim	27x32	18	18	0	437.32	437.32	0.00	1	...	24.99	0.00	18	False	437.32	False	1	False	24.99	False
+15	casual wear	denim	28	60	60	0	1344.16	1344.16	0.00	3	...	52.23	0.00	60	False	1344.16	False	3	False	52.23	False
+16	casual wear	denim	28x30	14	14	0	224.27	224.27	0.00	3	...	50.97	0.00	14	False	224.27	False	3	False	50.97	False
+17	casual wear	denim	28x28	1	1	0	12.50	12.50	0.00	0	...	0.00	0.00	1	False	12.50	False	0	False	0.00	False
+18	casual wear	denim	28x30	24	24	0	467.77	467.77	0.00	8	...	155.92	0.00	24	False	467.77	False	8	False	155.92	False
+19	casual wear	denim	29	178	178	0	4058.22	4058.22	0.00	17	...	391.83	0.00	178	False	4058.22	False	17	False	391.83	False
+20	casual wear	denim	29x30	18	18	0	305.82	305.82	0.00	6	...	89.20	0.00	18	False	305.82	False	6	False	89.20	False
+21	casual wear	denim	29x28	36	36	0	899.64	899.64	0.00	1	...	22.49	0.00	36	False	899.64	False	1	False	22.49	False
+22	casual wear	denim	29x32	20	20	0	487.31	487.31	0.00	2	...	48.73	0.00	20	False	487.31	False	2	False	48.73	False
+23	casual wear	denim	30	111	111	0	2753.90	2753.90	0.00	8	...	180.42	0.00	111	False	2753.90	False	8	False	180.42	False
+24	casual wear	denim	30x30	12	12	0	203.88	203.88	0.00	5	...	71.36	0.00	12	False	203.88	False	5	False	71.36	False
+25	casual wear	denim	31	80	80	0	1981.71	1981.71	0.00	4	...	97.46	0.00	80	False	1981.71	False	4	False	97.46	False
+26	casual wear	denim	30x31	29	29	0	488.46	488.46	0.00	3	...	42.48	0.00	29	False	488.46	False	3	False	42.48	False
+27	casual wear	denim	31x28	47	47	0	1174.53	1174.53	0.00	2	...	49.98	0.00	47	False	1174.53	False	2	False	49.98	False
+28	casual wear	denim	31x32	20	20	0	494.80	494.80	0.00	1	...	13.74	0.00	20	False	494.80	False	1	False	13.74	False
+29	casual wear	denim	32	60	60	0	1494.40	1494.40	0.00	7	...	162.44	0.00	60	False	1494.40	False	7	False	162.44	False
+30	casual wear	denim	30x32	16	16	0	263.35	263.35	0.00	0	...	0.00	0.00	16	False	263.35	False	0	False	0.00	False
+31	casual wear	denim	32x28	52	52	0	1293.23	1293.23	0.00	0	...	0.00	0.00	52	False	1293.23	False	0	False	0.00	False
+32	casual wear	denim	33	27	27	0	577.24	577.24	0.00	4	...	68.22	0.00	27	False	577.24	False	4	False	68.22	False
+33	casual wear	denim	30x33	19	19	0	308.37	308.37	0.00	2	...	28.03	0.00	19	False	308.37	False	2	False	28.03	False
+34	casual wear	denim	33x30	80	0	80	1582.00	0.00	1582.00	8	...	0.00	154.00	80	False	1582.00	False	8	False	154.00	False
+35	casual wear	denim	34	2	2	0	43.73	43.73	0.00	0	...	0.00	0.00	2	False	43.73	False	0	False	0.00	False
+36	casual wear	denim	34x30	1	1	0	17.49	17.49	0.00	1	...	17.49	0.00	1	False	17.49	False	1	False	17.49	False
+37	casual wear	denim	36	4	4	0	77.47	77.47	0.00	4	...	77.47	0.00	4	False	77.47	False	4	False	77.47	False
+38	casual wear	fashion knits	l	7731	6678	1053	117106.02	104219.82	12886.20	996	...	13433.67	1434.60	7731	False	117106.02	False	996	False	14868.27	False
+39	casual wear	fashion knits	m	2268	1961	307	34338.89	30639.39	3699.50	235	...	3137.48	368.00	2268	False	34338.89	False	235	False	3505.48	False
+40	casual wear	fashion knits	pl	61	61	0	782.00	782.00	0.00	6	...	72.74	0.00	61	False	782.00	False	6	False	72.74	False
+41	casual wear	fashion knits	pm	220	220	0	2853.25	2853.25	0.00	4	...	44.82	0.00	220	False	2853.25	False	4	False	44.82	False
+42	casual wear	fashion knits	ps	208	208	0	2693.48	2693.48	0.00	2	...	18.84	0.00	208	False	2693.48	False	2	False	18.84	False
+43	casual wear	fashion knits	pxl	31	31	0	397.49	397.49	0.00	3	...	31.18	0.00	31	False	397.49	False	3	False	31.18	False
+44	casual wear	fashion knits	s	1438	1314	124	21795.46	20267.01	1528.45	170	...	2404.16	199.10	1438	False	21795.46	False	170	False	2603.26	True
+45	casual wear	fashion knits	xl	2669	2459	210	40308.02	37659.77	2648.25	547	...	8022.17	493.35	2669	False	40308.02	False	547	False	8515.52	False
+46	casual wear	fashion knits	xs	1016	960	56	15857.41	14964.61	892.80	63	...	983.99	28.80	1016	False	15857.41	False	63	False	1012.79	False
+47	casual wear	shorts	24	17	17	0	285.43	285.43	0.00	0	...	0.00	0.00	17	False	285.43	False	0	False	0.00	False
+48	casual wear	shorts	25	57	57	0	960.78	960.78	0.00	2	...	24.64	0.00	57	False	960.78	False	2	False	24.64	False
+49	casual wear	shorts	26	20	20	0	336.40	336.40	0.00	1	...	9.34	0.00	20	False	336.40	False	1	False	9.34	False
+50	casual wear	shorts	27	48	48	0	812.97	812.97	0.00	11	...	172.45	0.00	48	False	812.97	False	11	False	172.45	False
+51	casual wear	shorts	28	97	97	0	1644.63	1644.63	0.00	3	...	37.38	0.00	97	False	1644.63	False	3	False	37.38	False
+52	casual wear	shorts	29	93	93	0	1576.67	1576.67	0.00	12	...	197.08	0.00	93	False	1576.67	False	12	False	197.08	False
+53	casual wear	shorts	30	56	56	0	951.44	951.44	0.00	13	...	220.87	0.00	56	False	951.44	False	13	False	220.87	False
+54	casual wear	shorts	31	84	84	0	1414.42	1414.42	0.00	10	...	157.16	0.00	84	False	1414.42	False	10	False	157.16	False
+55	casual wear	shorts	32	33	33	0	550.48	550.48	0.00	18	...	298.17	0.00	33	False	550.48	False	18	False	298.17	False
+56	casual wear	shorts	33	1	1	0	16.99	16.99	0.00	0	...	0.00	0.00	1	False	16.99	False	0	False	0.00	False
+57	casual wear	shorts	34	21	21	0	355.09	355.09	0.00	9	...	149.51	0.00	21	False	355.09	False	9	False	149.51	False
+58 rows × 23 columns
+
+#For the 'Mens Activewear' department I changed in the size column 'LG' to 'L', 'MD' to 'M' and 'SM' to 'S'. 
+#After that, I grouped them with the ones that have the same size in the same department and the same class.
+
+# Define a mapping dictionary for Mens Activewear
+size_mapping_mens = {
+    'lg': 'l',
+    'md': 'm',
+    'sm': 's'
+}
+
+# Apply the mapping to the 'Size' column for the 'Mens Activewear' department
+df.loc[df['Department'] == 'mens activewear', 'Size'] = df.loc[df['Department'] == 'mens activewear', 'Size'].map(size_mapping_mens).fillna(df['Size'])
+
+# Display rows in the 'Mens Activewear' department to confirm the change
+df[df['Department'] == 'mens activewear']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+1585	mens activewear	active pants	2xl	14	14	0	250.46	250.46	0.00	7	...	120.33	0.0	14	False	250.46	False	7	False	120.33	False
+1586	mens activewear	active pants	3xl	11	2	9	245.04	36.24	208.80	2	...	36.24	0.0	11	False	245.04	True	2	False	36.24	False
+1587	mens activewear	active pants	4xlt	6	6	0	115.94	115.94	0.00	5	...	86.96	0.0	6	False	115.94	False	5	False	86.96	False
+1588	mens activewear	active pants	5xl	15	0	15	222.75	0.00	222.75	3	...	0.00	40.5	15	False	222.75	False	3	False	40.50	False
+1589	mens activewear	active pants	l	185	185	0	3154.25	3154.25	0.00	71	...	1166.65	0.0	185	False	3154.25	False	71	False	1166.65	False
+1590	mens activewear	active pants	l	57	30	27	1382.71	734.71	648.00	7	...	89.96	72.0	57	False	1382.71	False	7	False	161.96	True
+1591	mens activewear	active pants	m	159	140	19	2533.31	2346.31	187.00	32	...	479.16	76.5	159	False	2533.31	False	32	False	555.66	True
+1592	mens activewear	active pants	m	165	78	87	4028.52	1941.72	2086.80	8	...	92.46	88.8	165	False	4028.52	True	8	False	181.26	False
+1593	mens activewear	active pants	s	143	132	11	2167.28	2062.28	105.00	12	...	177.72	28.0	143	False	2167.28	False	12	False	205.72	False
+1594	mens activewear	active pants	s	43	34	9	1042.22	833.42	208.80	9	...	181.18	34.8	43	False	1042.22	False	9	False	215.98	True
+1595	mens activewear	active pants	xl	149	149	0	3064.52	3064.52	0.00	20	...	413.81	0.0	149	False	3064.52	False	20	False	413.81	False
+1596	mens activewear	active pants	xs	1	1	0	12.99	12.99	0.00	1	...	6.50	0.0	1	False	12.99	False	1	False	6.50	False
+1597	mens activewear	traditional swimwear	2xl	2	2	0	28.03	28.03	0.00	0	...	0.00	0.0	2	False	28.03	False	0	False	0.00	False
+1598	mens activewear	traditional swimwear	l	284	270	14	5860.50	5649.30	211.20	33	...	647.69	19.2	284	False	5860.50	False	33	False	666.89	True
+1599	mens activewear	traditional swimwear	m	180	156	24	3398.75	3013.95	384.80	67	...	1248.18	148.0	180	False	3398.75	False	67	False	1396.18	False
+1600	mens activewear	traditional swimwear	s	136	136	0	2390.64	2390.64	0.00	24	...	551.76	0.0	136	False	2390.64	False	24	False	551.76	False
+1601	mens activewear	traditional swimwear	xl	93	76	17	1608.44	1334.84	273.60	12	...	213.20	28.8	93	False	1608.44	False	12	False	242.00	False
+1602	mens activewear	traditional swimwear	xxl	48	48	0	860.53	860.53	0.00	11	...	209.90	0.0	48	False	860.53	False	11	False	209.90	False
+18 rows × 23 columns
+
+#For the 'Mens Furnishings' department I changed the 'MD' to 'M' and delete spaces after the symbol '/' . 
+#So for instance, '16x34/ 35' will become '16x34/35'. 
+#After that, I grouped them with the ones that have the same size in the same department and the same class.
+
+# Define a mapping dictionary for Mens Furnishings
+size_mapping_mens_furnishings = {
+    'md': 'm',
+}
+
+# Apply the mapping to the 'Size' column for the 'Mens Furnishings' department
+df.loc[df['Department'] == 'mens furnishings', 'Size'] = df.loc[df['Department'] == 'mens furnishings', 'Size'].map(size_mapping_mens_furnishings).fillna(df['Size'])
+
+# Remove spaces after '/' in the 'Size' column for the 'Mens Furnishings' department
+df.loc[df['Department'] == 'mens furnishings', 'Size'] = df.loc[df['Department'] == 'mens furnishings', 'Size'].str.replace(' ', '', regex=False)
+#For the 'Mens Moderate Sporstwear' in the size column I changed values that have the symbol '/' to 'x' and 'LGT' to 'LT', ignore the case (upper case / lower case) of the letters. 
+#After that, I grouped them with the ones that have the same size in the same department and the same class.
+
+# Define a mapping dictionary for Mens Moderate Sportswear
+size_mapping_mens_sportswear = {
+    'lgt': 'lt',
+}
+
+# Apply the mapping to the 'Size' column for the 'Mens Moderate Sportswear' department
+df.loc[df['Department'] == 'mens moderate sportswear', 'Size'] = df.loc[df['Department'] == 'mens moderate sportswear', 'Size'].map(size_mapping_mens_sportswear).fillna(df['Size'])
+
+# Replace '/' with 'x' in the 'Size' column for the 'Mens Moderate Sportswear' department
+df.loc[df['Department'] == 'mens moderate sportswear', 'Size'] = df.loc[df['Department'] == 'mens moderate sportswear', 'Size'].str.replace('/', 'x')
+
+# Display rows in the 'Mens Moderate Sportswear' department to confirm the change
+df[df['Department'] == 'mens moderate sportswear']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+601	mens moderate sportswear	denim	29x30	2	2	0	44.98	44.98	0.00	1	...	22.49	0.0	2	False	44.98	False	1	False	22.49	False
+602	mens moderate sportswear	denim	30x32	1	1	0	16.24	16.24	0.00	0	...	0.00	0.0	1	False	16.24	False	0	False	0.00	False
+603	mens moderate sportswear	denim	30x34	23	23	0	552.28	552.28	0.00	2	...	42.48	0.0	23	False	552.28	False	2	False	42.48	False
+604	mens moderate sportswear	denim	30x30	19	19	0	462.32	462.32	0.00	2	...	46.23	0.0	19	False	462.32	False	2	False	46.23	False
+605	mens moderate sportswear	denim	30x32	8	8	0	199.92	199.92	0.00	0	...	0.00	0.0	8	False	199.92	False	0	False	0.00	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+693	mens moderate sportswear	ss woven tops	xl	135	135	0	2165.66	2165.66	0.00	42	...	639.78	0.0	135	False	2165.66	False	42	False	639.78	False
+694	mens moderate sportswear	ss woven tops	xs	2	2	0	32.28	32.28	0.00	0	...	0.00	0.0	2	False	32.28	False	0	False	0.00	False
+695	mens moderate sportswear	ss woven tops	xxl	37	37	0	659.64	659.64	0.00	26	...	461.75	0.0	37	False	659.64	False	26	False	461.75	False
+696	mens moderate sportswear	sweaters	m	25	0	25	486.00	0.00	486.00	2	...	0.00	27.0	25	False	486.00	False	2	False	27.00	False
+697	mens moderate sportswear	sweaters	s	57	0	57	1021.65	0.00	1021.65	6	...	0.00	86.1	57	False	1021.65	False	6	False	86.10	False
+97 rows × 23 columns
+
+#For the 'Contemporary' department I changed in the size column if the value  contains 'AU' or 'AUS'  keep only the last number. So for instance, if there is 'AU 6/US 2' will become '2'. 
+#After that,I grouped them with the ones that have the same size in the same department and the same class. 
+
+# Create a function to extract the last number from a string if it contains 'AU' or 'AUS'
+def extract_last_number_au(s):
+    if 'au' in s or 'aus' in s:
+        return ''.join(filter(str.isdigit, s.split()[-1]))
+    else:
+        return s
+
+# Apply the function to the 'Size' column for the 'Contemporary' department
+df.loc[df['Department'] == 'contemporary', 'Size'] = df.loc[df['Department'] == 'contemporary', 'Size'].apply(extract_last_number_au)
+
+# Display rows in the 'Contemporary' department to confirm the change
+df[df['Department'] == 'contemporary']
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	Full Price Sales	Markdown Sales	check_inventory_units	inventory_units_mismatch	check_inventory_value	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch
+196	contemporary	denim	23	370	340	30	17739.60	16859.60	880.00	18	...	791.84	44.0	370	False	17739.60	False	18	False	835.84	False
+197	contemporary	denim	24	3324	3178	146	135636.97	131533.22	4103.75	207	...	7890.63	500.5	3324	False	135636.97	False	207	False	8391.13	True
+198	contemporary	denim	25	3047	2973	74	120690.88	118814.28	1876.60	201	...	8941.08	213.4	3047	False	120690.88	False	201	False	9154.48	False
+199	contemporary	denim	26	3932	3906	26	152636.14	152072.94	563.20	367	...	15908.38	105.6	3932	False	152636.14	False	367	False	16013.98	False
+200	contemporary	denim	27	3031	3031	0	117863.69	117863.69	0.00	385	...	16719.15	0.0	3031	False	117863.69	False	385	False	16719.15	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+327	contemporary	wovens	l	814	773	41	23204.48	22283.78	920.70	65	...	1830.91	95.7	814	False	23204.48	False	65	False	1926.61	True
+328	contemporary	wovens	m	1656	1352	304	44529.28	38362.48	6166.80	119	...	2456.12	558.0	1656	False	44529.28	False	119	False	3014.12	False
+329	contemporary	wovens	s	1377	1091	286	38328.79	30948.34	7380.45	144	...	3085.95	873.6	1377	False	38328.79	False	144	False	3959.55	True
+330	contemporary	wovens	xl	26	26	0	831.74	831.74	0.00	6	...	168.94	0.0	26	False	831.74	False	6	False	168.94	False
+331	contemporary	wovens	xs	862	582	280	23985.93	16824.18	7161.75	67	...	1000.91	480.0	862	False	23985.93	False	67	False	1480.91	True
+136 rows × 23 columns
+
+# Assuming df is your DataFrame
+
+columns_to_delete = ['inventory_value_mismatch', 'check_units_sold', 'units_sold_mismatch', 'check_sales', 'sales_mismatch']
+
+df = df.drop(columns=columns_to_delete)
+Some other cleaning procedures could be executes in real life, after some in depth investigation of what the products and size numbers, as well as the inventory value and sales, as the steps taken so far were based in assumptions and research that could support those changes. For instance for further steps:
+
+For 'Decorative Textiles' department could take out the words'in' or 'IN' in the size column, and group with the other rows that have the same size in that department, if so. In other words, it there is a size 24in in that department, change to 24, and if there are already a 24 size for that department group them both together, but in order to do that, would be necessary to make sure if the products that are 24, are also in inches.
+
+Correct any department that has 'footwear' in the 'size' column to meet the american size foot chart. American sized go from 2 to 13 here, so anything bigger than that has to be converted to american size pattern by subtracting 31 from it. So, for instance, if there's a size 37.5 now should be 6.5. After that, group with the same size row, so, in the case, group with the other 6.5 size that has the same department and same class. Also, if contains the letters 'Wo' that can be followed by any other letter, keep only the numbers that come after the '/' symbol. So for instance, if the size column contain '11.5 Mens/13 Wo' keep only the number 13, or '3.5 Mens/5 Wome' keep only number 5, as it is under 'Ladies Footwear', and after join to the ones that have the same number size in the same department with the same class, if it is the case. However, that would be a very general and rough approximation and it may vary depending on the shoe manufacturer and the specific model of the shoe. So, more information would be ideal to make those changes.
+
+Also, the values in 'Sales' don't correspond, mostly, to the calculation of the value of one unit in inventory times units sold (considering full price, as markdown would be the value discounted). However, as it might be just because they are fake values, or because they consider other things that would be questioned in real life. As the discrepancies represents most of the rows, I decided to not correct them for now.
+
+Data Analysis
+# As the go is to analyze the size mix, I will be deleting the rows that have no value for size, as well as those, 
+# that had no mix sizes, only one size.
+
+# Delete rows with missing Size as we are focusing in the Size mix for this analysis
+df = df.dropna(subset=['Size'])
+# Delete rows with 'OS' in Size as well
+df = df[df['Size'] != 'OS']
+Should the inventory size mix be adjusted?
+
+To answer this question, I first took a general approach and look at the inventory-to-sales ratio for different sizes across all departments and classes and define what does it mean "inventory size balance seems off vs. sales". One simple way to define this could be to look at the ratio of 'Inventory Units' to 'Units Sold'. If a department or class has a high ratio, it means they have much more inventory than they are able to sell. This could indicate an imbalance.
+
+# Calculate the inventory to sales ratio
+df['Inventory_Sales_Ratio'] = df['Inventory Units'] / df['Units Sold']
+
+# Replace inf values with NaN (these occur when 'Units Sold' is 0)
+df['Inventory_Sales_Ratio'].replace([np.inf, -np.inf], np.nan, inplace=True)
+
+# Calculate the median inventory to sales ratio for each department
+department_ratios = df.groupby('Department')['Inventory_Sales_Ratio'].median().sort_values(ascending=False)
+
+# Plot the median inventory to sales ratio for each department
+plt.figure(figsize=(9, 9))
+sns.barplot(y=department_ratios.index, x=department_ratios.values, orient='h')
+plt.xlabel('Median Inventory to Sales Ratio')
+plt.ylabel('Department')
+plt.title('Inventory to Sales Ratio by Department')
+plt.show()
+No description has been provided for this image
+Now, I will calculate the inventory-to-sales ratio for each size within each department and class, and then identify the ones with the highest ratios. This will provide with insights into which sizes might need adjustments in their inventory mix. So, if a particular size within a department or class has a high inventory-to-sales ratio, this could suggest that the retailer is stocking too much inventory for that size, and an adjustment might be beneficial.
+
+# Exclude sizes with NaN inventory to sales ratio
+size_ratios = df.dropna(subset=['Inventory_Sales_Ratio'])
+
+# For each department and class, select the size with the highest median inventory to sales ratio
+top_size_ratios = size_ratios.loc[size_ratios.groupby(['Department', 'Class'])['Inventory_Sales_Ratio'].idxmax()]
+
+# Display the top 10 sizes with the highest inventory to sales ratio
+top_size_ratios.sort_values('Inventory_Sales_Ratio', ascending=False).head(10)
+Department	Class	Size	Inventory Units	Full Price Inventory Units	Markdown Inventory Units	Inventory Value	Full Price Inventory Value	Markdown Inventory Value	Units Sold	...	inventory_value_mismatch	check_units_sold	units_sold_mismatch	check_sales	sales_mismatch	Inventory_Sales_Ratio	Sales per Unit in Inventory	Sell-through Rate	Markdown Ratio	Inventory per Unit Sold
+517	activewear	shorts/skirts	2xl	412	412	0	5693.79	5693.79	0.0	2	...	False	2	False	29.23	False	206.0	0.070947	0.004854	0.0	2846.895
+1428	decorative textiles	easter pillows	14x24	241	0	241	4810.00	0.00	4810.0	2	...	False	2	False	37.00	False	120.5	0.153527	0.008299	1.0	2405.000
+1365	bedding	pillowcases	standard	219	219	0	10206.07	10206.07	0.0	2	...	False	2	False	29.23	False	109.5	0.133470	0.009132	0.0	5103.035
+42	casual wear	fashion knits	ps	208	208	0	2693.48	2693.48	0.0	2	...	False	2	False	18.84	False	104.0	0.090577	0.009615	0.0	1346.740
+1397	bath shop/textiles	seasonal table linens	84x10.5x9	167	0	167	1995.00	0.00	1995.0	2	...	False	2	False	22.80	False	83.5	0.136527	0.011976	1.0	997.500
+1024	ladies footwear	sneakers	12	77	41	36	2664.59	1520.59	1144.0	1	...	False	1	False	20.80	False	77.0	0.270130	0.012987	1.0	2664.590
+3	casual wear	denim	25	68	68	0	1495.58	1495.58	0.0	1	...	False	1	False	18.99	False	68.0	0.279265	0.014706	0.0	1495.580
+1714	gourmet housewares	hydration	25oz	960	960	0	23990.40	23990.40	0.0	15	...	False	15	False	374.85	False	64.0	0.390469	0.015625	0.0	1599.360
+703	young mens	denim	34x32	46	46	0	919.54	919.54	0.0	1	...	False	1	False	19.99	False	46.0	0.434565	0.021739	0.0	919.540
+74	best brands casual	career wovens	s/xs	46	0	46	2918.40	0.00	2918.4	1	...	False	1	False	51.20	False	46.0	1.113043	0.021739	1.0	2918.400
+10 rows × 28 columns
+
+The table above lists the top 10 size categories across all departments and classes that have the highest inventory-to-sales ratios. High ratios suggest that the retailer is stocking too much inventory for these sizes, and adjustments might be beneficial.
+
+# Display the 10 sizes with the highest inventory to sales ratio
+top_10_size_ratios = top_size_ratios.sort_values('Inventory_Sales_Ratio', ascending=False).head(10)
+
+# Creating the plot
+fig, ax = plt.subplots(figsize=(10, 8))
+
+top_10_size_ratios.plot(kind='barh', x='Size', y='Inventory_Sales_Ratio', ax=ax, color='blue', legend=False)
+ax.set_title('10 Sizes with Highest Inventory to Sales Ratio')
+ax.set_xlabel('Inventory to Sales Ratio')
+
+# Adjusting layout
+fig.tight_layout()
+plt.show()
+No description has been provided for this image
+I'll also compute a new metric - 'Sales per Unit in Inventory' (i.e., Sales divided by Inventory Units) for each item. This will give us an idea of how efficiently the inventory is being sold for each size, class, and department. A lower 'Sales per Unit in Inventory' could suggest an oversupply, while a higher value could suggest undersupply. This metric represents the sales generated per unit of inventory, giving us a simple measure of inventory efficiency.
+
+#Compute 'Sales per Unit in Inventory'
+df['Sales per Unit in Inventory'] = df['Sales'] / df['Inventory Units']
+
+# Handle division by zero (if any)
+df['Sales per Unit in Inventory'] = df['Sales per Unit in Inventory'].replace([np.inf, -np.inf], np.nan)
+
+# Group by 'Department' and compute average 'Sales per Unit in Inventory'
+department_analysis = df.groupby('Department')['Sales per Unit in Inventory'].mean().sort_values(ascending=False)
+
+
+# 5. Create a graph for the top 10 departments
+top_10_departments = department_analysis.head(10)
+
+# Plot the data
+plt.figure(figsize=(10, 6))
+plt.bar(top_10_departments.index, top_10_departments.values, color='red')
+plt.xlabel('Department')
+plt.ylabel('Average Sales per Unit in Inventory')
+plt.title('Top 10 Departments by Average Sales per Unit in Inventory')
+plt.xticks(rotation='vertical')
+plt.show()
+No description has been provided for this image
+From the data, it seems that the departments towards the bottom of the list may have an inventory size balance issue, as their average Sales per Unit in Inventory is relatively low. This could suggest that they have more inventory than is being sold. On the other hand, the departments towards the top of the list, like Ladies Footwear, Men & Womens Athle, and Decorative Textiles, have a high Sales per Unit in Inventory, suggesting that they may be selling more efficiently and their inventory size balance may be more optimal. For a mode detailed breakdown for the Ladies Footwear and Home Furnishings departments, grouped by Class and Size:
+
+# Group by 'Department', 'Class', and 'Size' and compute average 'Sales per Unit in Inventory'
+class_size_analysis = df.groupby(['Department', 'Class', 'Size'])['Sales per Unit in Inventory'].mean()
+
+# Group the data by Department, Class, and Size, and calculate total inventory and sales for each group
+summary = df.groupby(['Department', 'Class', 'Size']).agg({'Inventory Units': 'sum', 'Sales': 'sum'}).reset_index()
+
+
+
+# Display the results for 'Ladies Footwear' and 'Gourmet Housewares'
+ladies_footwear_analysis = class_size_analysis.loc['ladies footwear'].sort_values(ascending=False)
+home_furnishings_analysis = class_size_analysis.loc['gourmet housewares'].sort_values(ascending=False)
+
+ladies_footwear_analysis, home_furnishings_analysis
+(Class       Size
+ luxury      39.5    698.492500
+             38.5    474.835333
+ boots       5.5     201.485000
+             10.5    164.990000
+             37.5    155.536667
+                        ...    
+ sandals     9n        0.000000
+             12ww      0.000000
+ luxury      10.5      0.000000
+ sandals     9 4e      0.000000
+ storm/rain  8         0.000000
+ Name: Sales per Unit in Inventory, Length: 273, dtype: float64,
+ Class      Size
+ hydration  16oz    3.990833
+            12oz    0.565802
+            24oz    0.509552
+            25oz    0.390469
+ Name: Sales per Unit in Inventory, dtype: float64)
+From this, we can see that within the Ladies Footwear department, the inventory size balance seems to be off for certain classes and sizes. Even though the department as a whole has a high sales per unit in inventory, certain sizes within classes are not selling well. This suggests that the retailer could adjust the size mix within this department to improve inventory efficiency.
+
+#1. **What are the top 5 sizes with the highest sales across all departments and classes?**
+
+#To answer this, I will group the data by size and sum the 'Units Sold' for each size. 
+#I will then display the top 5 sizes with the highest total sales.
+
+# Calculate total sales for each size across all departments and classes
+size_sales = df.groupby('Size')['Units Sold'].sum()
+
+# Display the top 5 sizes with the highest total sales
+top_size_sales = size_sales.sort_values(ascending=False).head(5)
+
+top_size_sales
+
+#The table above lists the top 5 sizes with the highest total sales across all departments and classes. 
+
+plt.figure(figsize=(20, 15))
+
+plt.subplot(321)
+sns.barplot(x=top_size_sales.index, y=top_size_sales.values, palette="Blues_d")
+plt.xlabel('Size')
+plt.ylabel('Total Units Sold')
+plt.title('Top 5 Sizes with Highest Total Sales')
+Text(0.5, 1.0, 'Top 5 Sizes with Highest Total Sales')
+No description has been provided for this image
+#2.	**What is the inventory-to-sales ratio for the sizes with the highest sales?**
+
+# Calculate the inventory to sales ratio for the top 5 sizes with the highest total sales
+top_size_sales_ratios = df[df['Size'].isin(top_size_sales.index)].groupby('Size')['Inventory_Sales_Ratio'].median()
+
+top_size_sales_ratios
+
+#To answer this, I will calculate the inventory-to-sales ratio for the top 5 sizes with the highest total sales 
+#(i.e., 'unknown_size', 'l', 'm', 's', and 'xl'). This will help to understand how well the current inventory levels for these sizes align with sales.
+
+#The table above lists the median inventory-to-sales ratios for the top 5 sizes with the highest total sales across all departments and classes.
+
+plt.figure(figsize=(20, 15))
+plt.subplot(321)
+sns.barplot(x=top_size_sales_ratios.index, y=top_size_sales_ratios.values, palette="Blues_d")
+plt.xlabel('Size')
+plt.ylabel('Inventory to Sales Ratio')
+plt.title('Inventory to Sales Ratio for Top 5 Sizes with Highest Total Sales')
+Text(0.5, 1.0, 'Inventory to Sales Ratio for Top 5 Sizes with Highest Total Sales')
+No description has been provided for this image
+We can evaluate classes within departments (Ladies Footwear in this case), and these insights can help the TJX identify top-selling sizes, departments, and classes and ensure that inventory levels for these categories are appropriately aligned with sales. Any necessary adjustments to the inventory size mix can then be made based on these insights.
+
+#3.	**What are the top 3 classes with the highest total sales within the top-selling department ('ladies footwear')?**
+
+# Filter the data for the 'ladies footwear' department
+ladies_footwear_data = df[df['Department'] == 'ladies footwear']
+
+# Calculate total sales for each class within the 'ladies footwear' department
+class_sales = ladies_footwear_data.groupby('Class')['Units Sold'].sum()
+
+# Display the top 3 classes with the highest total sales
+top_class_sales = class_sales.sort_values(ascending=False).head(3)
+
+top_class_sales
+
+# Bar plot for top 3 classes with highest total sales within 'ladies footwear' department
+plt.figure(figsize=(15, 10))
+plt.subplot(325)
+sns.barplot(x=top_class_sales.index, y=top_class_sales.values, palette="Blues_d")
+plt.xlabel('Class')
+plt.ylabel('Total Units Sold')
+plt.title('Top 3 Classes with Highest Total Sales within Ladies Footwear Department')
+
+plt.tight_layout()
+plt.show()
+No description has been provided for this image
+Now, asnwering the following questions:
+
+"Are there any departments where the inventory size balance seems off vs. sales?" and "Does this imbalance exist across multiple departments / classes?" "What is the sales performance of each size per department? This can be determined by analyzing the 'Units Sold' for each size." "What sizes are most often sold at a markdown per department? This can be found by analyzing the 'Markdown Units Sold' for each size. "Are there sizes that are rarely sold but have a high inventory value per department? This would indicate that the retailer is overstocked on these sizes and should adjust their inventory." "What is the sell-through rate for each size per department? Sell-through rate is the percentage of units sold versus the number of units that were available to be sold."
+
+# Recalculate metrics
+df['Sell-through Rate'] = df['Units Sold'] / df['Inventory Units']
+df['Markdown Ratio'] = df['Markdown Units Sold'] / df['Units Sold']
+df['Inventory per Unit Sold'] = df['Inventory Value'] / df['Units Sold']
+
+# Summary statistics for each size and department
+dept_size_summary = df.groupby(['Department', 'Size']).agg({
+    'Units Sold': 'sum',
+    'Inventory Units': 'sum',
+    'Inventory Value': 'sum',
+    'Markdown Units Sold': 'sum',
+    'Sell-through Rate': 'mean',
+    'Markdown Ratio': 'mean',
+    'Inventory per Unit Sold': 'mean'
+}).reset_index()
+
+dept_size_summary.head()
+
+# Define a function to get the best and worst performing sizes per department based on a given metric
+def get_best_and_worst_sizes(metric):
+    # Sort by the given metric
+    dept_size_summary.sort_values(metric, ascending=False, inplace=True)
+
+    # Get the best and worst sizes per department
+    best_sizes = dept_size_summary.groupby('Department').first()
+    worst_sizes = dept_size_summary.groupby('Department').last()
+
+    # Return the best and worst sizes
+    return best_sizes, worst_sizes
+
+# Get the best and worst sizes per department based on 'Units Sold'
+best_sizes_sales, worst_sizes_sales = get_best_and_worst_sizes('Units Sold')
+
+# Get the best and worst sizes per department based on 'Markdown Units Sold'
+best_sizes_markdown, worst_sizes_markdown = get_best_and_worst_sizes('Markdown Units Sold')
+
+# Get the best and worst sizes per department based on 'Inventory Value'
+best_sizes_inventory, worst_sizes_inventory = get_best_and_worst_sizes('Inventory Value')
+
+# Get the best and worst sizes per department based on 'Sell-through Rate'
+best_sizes_sell_through, worst_sizes_sell_through = get_best_and_worst_sizes('Sell-through Rate')
+
+best_sizes_sales, worst_sizes_sales, best_sizes_markdown, worst_sizes_markdown, best_sizes_inventory, worst_sizes_inventory, best_sizes_sell_through, worst_sizes_sell_through
+(                            Size  Units Sold  Inventory Units  \
+ Department                                                      
+ activewear                     l        3404            19027   
+ bath  body  hair             nan           0            52122   
+ bath shop/textiles         20x30         234              533   
+ bedding                     king        1057             7961   
+ best brands casual             l         995             6486   
+ casual wear                    l         996             7731   
+ children's accessories       nan           0             3791   
+ contemporary                   s        1885            15178   
+ decorative textiles        22x22         802             8195   
+ dresses/ladies suits           8        2363            16131   
+ fragrances                   nan           0             9802   
+ gourmet housewares          12oz          60             1608   
+ haircare                     nan           0            16869   
+ handbags/accessories           l          81              303   
+ home furnishings             nan           0            10594   
+ inf & toddlers               18m         394             3750   
+ junior drs/swtr/jkt            s         431             5063   
+ junior sportswear              m         422             4068   
+ knitwear                       m        1389            13624   
+ ladies footwear                8        2549            21306   
+ luggage/accessories          nan           0            10971   
+ men & womens athle             8         807             3117   
+ mens accessories/giftware     38          17              141   
+ mens activewear                l         111              526   
+ mens best brands               l        1404             9057   
+ mens contemporary              l        1436            11979   
+ mens furnishings               l         448             8241   
+ mens moderate sportswear       l         467             3197   
+ seasonal decorative           10          17               20   
+ table top                   13oz          17               24   
+ toys & books                 nan           0            20356   
+ treatment / color            nan           0           137650   
+ women's sizes                 1x         450             4247   
+ young mens                    xl         129              549   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                       326324.98                  363   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                 6403.93                    0   
+ bedding                          408960.15                  300   
+ best brands casual               205870.54                   83   
+ casual wear                      117106.02                  123   
+ children's accessories            55629.09                    0   
+ contemporary                     560466.99                  208   
+ decorative textiles              220063.23                  194   
+ dresses/ladies suits             781195.07                  189   
+ fragrances                       277921.93                    0   
+ gourmet housewares                25742.32                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories              13001.53                    6   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                    44891.99                   78   
+ junior drs/swtr/jkt               94577.93                  123   
+ junior sportswear                 61498.66                   93   
+ knitwear                         240437.97                  205   
+ ladies footwear                  815711.64                  229   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle               122968.00                  171   
+ mens accessories/giftware          2356.25                    2   
+ mens activewear                   10397.46                    4   
+ mens best brands                 170924.86                  162   
+ mens contemporary                254001.72                  136   
+ mens furnishings                 114886.28                  170   
+ mens moderate sportswear          45844.08                    6   
+ seasonal decorative                 398.80                    0   
+ table top                           308.51                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                     87454.61                   91   
+ young mens                         6624.59                   14   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.308606        0.207727   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.366099        0.000000   
+ bedding                             0.138392        0.323996   
+ best brands casual                  0.146738        0.079012   
+ casual wear                         0.128832        0.123494   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.119801        0.086892   
+ decorative textiles                 0.095038        0.261044   
+ dresses/ladies suits                0.148843        0.130804   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.037313        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.267327        0.074074   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.186780        0.093414   
+ junior drs/swtr/jkt                 0.074571        0.439068   
+ junior sportswear                   0.168790        0.199099   
+ knitwear                            0.145475        0.680391   
+ ladies footwear                     0.114909        0.160211   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.249378        0.103969   
+ mens accessories/giftware           0.120567        0.117647   
+ mens activewear                     0.207596        0.152958   
+ mens best brands                    0.244719        0.216857   
+ mens contemporary                   0.228549        0.064635   
+ mens furnishings                    0.056172        0.232610   
+ mens moderate sportswear            0.124929        0.043870   
+ seasonal decorative                 0.850000        0.000000   
+ table top                           0.708333        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.115767        0.092350   
+ young mens                          0.375113        0.064815   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                               93.367866  
+ bath  body  hair                               NaN  
+ bath shop/textiles                       41.748218  
+ bedding                                 450.525792  
+ best brands casual                      278.519813  
+ casual wear                             117.576325  
+ children's accessories                         inf  
+ contemporary                            366.639653  
+ decorative textiles                     268.672239  
+ dresses/ladies suits                    304.175998  
+ fragrances                                     NaN  
+ gourmet housewares                      429.038667  
+ haircare                                       NaN  
+ handbags/accessories                    160.512716  
+ home furnishings                               NaN  
+ inf & toddlers                          150.822175  
+ junior drs/swtr/jkt                     262.590976  
+ junior sportswear                       144.943743  
+ knitwear                                155.901026  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                      177.245897  
+ mens accessories/giftware               138.602941  
+ mens activewear                         139.848988  
+ mens best brands                         92.297125  
+ mens contemporary                       201.022415  
+ mens furnishings                        266.918019  
+ mens moderate sportswear                129.773444  
+ seasonal decorative                      23.458824  
+ table top                                18.147647  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                           202.217178  
+ young mens                               47.516250  ,
+                                     Size  Units Sold  Inventory Units  \
+ Department                                                              
+ activewear                         32a/b           0                5   
+ bath  body  hair                     nan           0            52122   
+ bath shop/textiles                   nan           0             1033   
+ bedding                            70x50           0                2   
+ best brands casual                    24           1                1   
+ casual wear                        32x28           0               52   
+ children's accessories               nan           0             3791   
+ contemporary                         xxl           0               14   
+ decorative textiles                  nan           0             3598   
+ dresses/ladies suits                  22           0                1   
+ fragrances                           nan           0             9802   
+ gourmet housewares                  25oz          15              960   
+ haircare                             nan           0            16869   
+ handbags/accessories                 nan           0            27535   
+ home furnishings                     nan           0            10594   
+ inf & toddlers                        nb           2              135   
+ junior drs/swtr/jkt                   xs         125             1328   
+ junior sportswear                  28/28           0               15   
+ knitwear                             xxl           2               18   
+ ladies footwear                    12 4e           0               12   
+ luggage/accessories                  nan           0            10971   
+ men & womens athle                  5.5w           0                1   
+ mens accessories/giftware             58           0                2   
+ mens activewear                       xs           1                1   
+ mens best brands                      37           0               12   
+ mens contemporary                  34x30           0                2   
+ mens furnishings           16-16.5x32/33           0               17   
+ mens moderate sportswear           32x27           0               18   
+ seasonal decorative                  nan           0             9933   
+ table top                           11oz           0               21   
+ toys & books                         nan           0            20356   
+ treatment / color                    nan           0           137650   
+ women's sizes                        26w           0               58   
+ young mens                            29           0                8   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                          122.45                    0   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                38265.23                    0   
+ bedding                            2464.98                    0   
+ best brands casual                   19.99                    0   
+ casual wear                        1293.23                    0   
+ children's accessories            55629.09                    0   
+ contemporary                        299.20                    0   
+ decorative textiles              139629.11                    0   
+ dresses/ladies suits                109.99                    0   
+ fragrances                       277921.93                    0   
+ gourmet housewares                23990.40                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories            1062022.73                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                     2340.96                    0   
+ junior drs/swtr/jkt               14457.44                   93   
+ junior sportswear                   374.85                    0   
+ knitwear                            344.83                    0   
+ ladies footwear                     288.63                    0   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle                   38.99                    0   
+ mens accessories/giftware           404.99                    0   
+ mens activewear                      12.99                    0   
+ mens best brands                    313.60                    0   
+ mens contemporary                   116.98                    0   
+ mens furnishings                    334.73                    0   
+ mens moderate sportswear            344.83                    0   
+ seasonal decorative               87657.45                    0   
+ table top                          1259.79                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                      1626.17                    0   
+ young mens                          159.92                    0   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.000000        1.000000   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.000000        1.000000   
+ bedding                             0.000000        0.000000   
+ best brands casual                  1.000000        0.000000   
+ casual wear                         0.000000        0.000000   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.000000        0.000000   
+ decorative textiles                 0.000000        1.000000   
+ dresses/ladies suits                0.000000        0.000000   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.015625        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.000000        0.000000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.037037        0.000000   
+ junior drs/swtr/jkt                 0.108056        0.567568   
+ junior sportswear                   0.000000        1.000000   
+ knitwear                            0.111111        0.000000   
+ ladies footwear                     0.000000        0.000000   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.000000        1.000000   
+ mens accessories/giftware           0.000000        1.000000   
+ mens activewear                     1.000000        0.000000   
+ mens best brands                    0.000000        1.000000   
+ mens contemporary                   0.000000        0.000000   
+ mens furnishings                    0.000000        0.000000   
+ mens moderate sportswear            0.000000        0.000000   
+ seasonal decorative                 0.000000        0.000000   
+ table top                           0.000000        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.000000        0.000000   
+ young mens                          0.000000        0.000000   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                                     inf  
+ bath  body  hair                               NaN  
+ bath shop/textiles                      151.800000  
+ bedding                                        inf  
+ best brands casual                       19.990000  
+ casual wear                                    inf  
+ children's accessories                         inf  
+ contemporary                                   inf  
+ decorative textiles                            inf  
+ dresses/ladies suits                           inf  
+ fragrances                                     NaN  
+ gourmet housewares                     1599.360000  
+ haircare                                       NaN  
+ handbags/accessories                           inf  
+ home furnishings                               NaN  
+ inf & toddlers                           72.095000  
+ junior drs/swtr/jkt                     131.806030  
+ junior sportswear                              inf  
+ knitwear                                172.415000  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                             inf  
+ mens accessories/giftware                      inf  
+ mens activewear                          12.990000  
+ mens best brands                               inf  
+ mens contemporary                              inf  
+ mens furnishings                               inf  
+ mens moderate sportswear                       inf  
+ seasonal decorative                      23.458824  
+ table top                                      inf  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                          1325.750000  
+ young mens                                     inf  ,
+                             Size  Units Sold  Inventory Units  \
+ Department                                                      
+ activewear                     m        3214            19430   
+ bath  body  hair             nan           0            52122   
+ bath shop/textiles         18x28          41              147   
+ bedding                     king        1057             7961   
+ best brands casual             m         645             4781   
+ casual wear                    l         996             7731   
+ children's accessories       nan           0             3791   
+ contemporary                   s        1885            15178   
+ decorative textiles        22x22         802             8195   
+ dresses/ladies suits           m        1865            15678   
+ fragrances                   nan           0             9802   
+ gourmet housewares          16oz          18               84   
+ haircare                     nan           0            16869   
+ handbags/accessories           m          75              209   
+ home furnishings             nan           0            10594   
+ inf & toddlers               24m         371             3664   
+ junior drs/swtr/jkt            s         431             5063   
+ junior sportswear              m         422             4068   
+ knitwear                       m        1389            13624   
+ ladies footwear              7.5        2097            16938   
+ luggage/accessories          nan           0            10971   
+ men & womens athle             8         807             3117   
+ mens accessories/giftware     32           5               12   
+ mens activewear                m         107              504   
+ mens best brands               l        1404             9057   
+ mens contemporary              l        1436            11979   
+ mens furnishings               m         407             5996   
+ mens moderate sportswear       s         149             1505   
+ seasonal decorative          nan           0             9933   
+ table top                   11oz           0               21   
+ toys & books                 nan           0            20356   
+ treatment / color            nan           0           137650   
+ women's sizes                 1x         450             4247   
+ young mens                     l         117             1054   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                       350497.77                  365   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                 1080.00                   41   
+ bedding                          408960.15                  300   
+ best brands casual               134782.32                  117   
+ casual wear                      117106.02                  123   
+ children's accessories            55629.09                    0   
+ contemporary                     560466.99                  208   
+ decorative textiles              220063.23                  194   
+ dresses/ladies suits             483796.99                  219   
+ fragrances                       277921.93                    0   
+ gourmet housewares                 1639.56                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories              11956.71                   12   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                    46278.05                  100   
+ junior drs/swtr/jkt               94577.93                  123   
+ junior sportswear                 61498.66                   93   
+ knitwear                         240437.97                  205   
+ ladies footwear                  685777.53                  247   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle               122968.00                  171   
+ mens accessories/giftware           159.79                    5   
+ mens activewear                    9960.58                   21   
+ mens best brands                 170924.86                  162   
+ mens contemporary                254001.72                  136   
+ mens furnishings                  79553.74                  239   
+ mens moderate sportswear          22237.66                   36   
+ seasonal decorative               87657.45                    0   
+ table top                          1259.79                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                     87454.61                   91   
+ young mens                        12793.51                   19   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.198592        0.199224   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.278912        1.000000   
+ bedding                             0.138392        0.323996   
+ best brands casual                  0.121025        0.125062   
+ casual wear                         0.128832        0.123494   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.119801        0.086892   
+ decorative textiles                 0.095038        0.261044   
+ dresses/ladies suits                0.118956        0.117426   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.214286        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.358852        0.160000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.117357        0.107363   
+ junior drs/swtr/jkt                 0.074571        0.439068   
+ junior sportswear                   0.168790        0.199099   
+ knitwear                            0.145475        0.680391   
+ ladies footwear                     0.146985        0.167720   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.249378        0.103969   
+ mens accessories/giftware           0.416667        1.000000   
+ mens activewear                     0.207322        0.294776   
+ mens best brands                    0.244719        0.216857   
+ mens contemporary                   0.228549        0.064635   
+ mens furnishings                    0.236175        0.413337   
+ mens moderate sportswear            0.096164        0.338961   
+ seasonal decorative                 0.000000        0.000000   
+ table top                           0.000000        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.115767        0.092350   
+ young mens                          0.123137        0.107955   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                              110.677563  
+ bath  body  hair                               NaN  
+ bath shop/textiles                       26.341463  
+ bedding                                 450.525792  
+ best brands casual                      310.995898  
+ casual wear                             117.576325  
+ children's accessories                         inf  
+ contemporary                            366.639653  
+ decorative textiles                     268.672239  
+ dresses/ladies suits                    259.408574  
+ fragrances                                     NaN  
+ gourmet housewares                       91.086667  
+ haircare                                       NaN  
+ handbags/accessories                    159.422800  
+ home furnishings                               NaN  
+ inf & toddlers                          134.640607  
+ junior drs/swtr/jkt                     262.590976  
+ junior sportswear                       144.943743  
+ knitwear                                155.901026  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                      177.245897  
+ mens accessories/giftware                31.958000  
+ mens activewear                         211.152850  
+ mens best brands                         92.297125  
+ mens contemporary                       201.022415  
+ mens furnishings                        265.380632  
+ mens moderate sportswear                170.979506  
+ seasonal decorative                      23.458824  
+ table top                                      inf  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                           202.217178  
+ young mens                               47.516250  ,
+                                Size  Units Sold  Inventory Units  \
+ Department                                                         
+ activewear                    32a/b           0                5   
+ bath  body  hair                nan           0            52122   
+ bath shop/textiles            35x70           7              221   
+ bedding                       45x60           8               98   
+ best brands casual               27          11               53   
+ casual wear                      26           7              120   
+ children's accessories          nan           0             3791   
+ contemporary                      0          39              292   
+ decorative textiles            8x12           7                4   
+ dresses/ladies suits            18p           8                6   
+ fragrances                      nan           0             9802   
+ gourmet housewares             12oz          60             1608   
+ haircare                        nan           0            16869   
+ handbags/accessories             xl          36              182   
+ home furnishings                nan           0            10594   
+ inf & toddlers                6-12m           4               23   
+ junior drs/swtr/jkt              xl         139              437   
+ junior sportswear             28/30           9               11   
+ knitwear                        xxl           2               18   
+ ladies footwear               12 4e           0               12   
+ luggage/accessories             nan           0            10971   
+ men & womens athle            10.5w           7               29   
+ mens accessories/giftware        52           0                3   
+ mens activewear                 2xl           7               16   
+ mens best brands              38x32           8               27   
+ mens contemporary             30x30           7               18   
+ mens furnishings           16x32/33           8               37   
+ mens moderate sportswear      38x32           7               25   
+ seasonal decorative              10          17               20   
+ table top                      15oz           9                9   
+ toys & books                    nan           0            20356   
+ treatment / color               nan           0           137650   
+ women's sizes                    0x           4               80   
+ young mens                       32           8              119   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                          122.45                    0   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                 8817.80                    0   
+ bedding                            2915.03                    0   
+ best brands casual                 1347.97                    0   
+ casual wear                        2583.40                    0   
+ children's accessories            55629.09                    0   
+ contemporary                       9874.10                    0   
+ decorative textiles                  49.47                    0   
+ dresses/ladies suits                526.44                    0   
+ fragrances                       277921.93                    0   
+ gourmet housewares                25742.32                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories              19948.59                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                      288.38                    0   
+ junior drs/swtr/jkt                8831.67                    0   
+ junior sportswear                   262.40                    0   
+ knitwear                            344.83                    0   
+ ladies footwear                     288.63                    0   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle                 1895.71                    0   
+ mens accessories/giftware           854.97                    0   
+ mens activewear                     278.49                    0   
+ mens best brands                    813.50                    0   
+ mens contemporary                   699.83                    0   
+ mens furnishings                    875.44                    0   
+ mens moderate sportswear            656.01                    0   
+ seasonal decorative                 398.80                    0   
+ table top                           126.67                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                      2366.21                    0   
+ young mens                         2497.81                    0   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.000000        0.000000   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.031674        0.000000   
+ bedding                             0.081633        0.000000   
+ best brands casual                  0.207547        0.000000   
+ casual wear                         0.055000        0.000000   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.389589        0.000000   
+ decorative textiles                 1.750000        0.000000   
+ dresses/ladies suits                1.333333        0.000000   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.037313        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.197802        0.000000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.173913        0.000000   
+ junior drs/swtr/jkt                 0.241627        0.000000   
+ junior sportswear                   0.818182        0.000000   
+ knitwear                            0.111111        0.000000   
+ ladies footwear                     0.000000        0.000000   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.241379        0.000000   
+ mens accessories/giftware           0.000000        0.117647   
+ mens activewear                     0.250000        0.000000   
+ mens best brands                    0.299451        0.000000   
+ mens contemporary                   0.388889        0.000000   
+ mens furnishings                    0.216216        0.000000   
+ mens moderate sportswear            0.269231        0.000000   
+ seasonal decorative                 0.850000        0.000000   
+ table top                           1.000000        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.054688        0.000000   
+ young mens                          0.067227        0.000000   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                                     inf  
+ bath  body  hair                               NaN  
+ bath shop/textiles                     1259.685714  
+ bedding                                 364.378750  
+ best brands casual                      122.542727  
+ casual wear                             355.450000  
+ children's accessories                         inf  
+ contemporary                            307.284716  
+ decorative textiles                       7.067143  
+ dresses/ladies suits                     65.805000  
+ fragrances                                     NaN  
+ gourmet housewares                      429.038667  
+ haircare                                       NaN  
+ handbags/accessories                    554.127500  
+ home furnishings                               NaN  
+ inf & toddlers                           72.095000  
+ junior drs/swtr/jkt                     120.459632  
+ junior sportswear                        29.155556  
+ knitwear                                172.415000  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                      270.815714  
+ mens accessories/giftware                      inf  
+ mens activewear                                inf  
+ mens best brands                        106.774667  
+ mens contemporary                        99.975714  
+ mens furnishings                        109.430000  
+ mens moderate sportswear                134.941250  
+ seasonal decorative                      23.458824  
+ table top                                14.074444  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                           547.318333  
+ young mens                              312.226250  ,
+                             Size  Units Sold  Inventory Units  \
+ Department                                                      
+ activewear                     m        3214            19430   
+ bath  body  hair             nan           0            52122   
+ bath shop/textiles           nan           0             1033   
+ bedding                     king        1057             7961   
+ best brands casual             l         995             6486   
+ casual wear                    l         996             7731   
+ children's accessories       nan           0             3791   
+ contemporary                   s        1885            15178   
+ decorative textiles        22x22         802             8195   
+ dresses/ladies suits           6        1953            13388   
+ fragrances                   nan           0             9802   
+ gourmet housewares          12oz          60             1608   
+ haircare                     nan           0            16869   
+ handbags/accessories         nan           0            27535   
+ home furnishings             nan           0            10594   
+ inf & toddlers               12m         388             4697   
+ junior drs/swtr/jkt            s         431             5063   
+ junior sportswear              m         422             4068   
+ knitwear                       m        1389            13624   
+ ladies footwear                8        2549            21306   
+ luggage/accessories          nan           0            10971   
+ men & womens athle             8         807             3117   
+ mens accessories/giftware     38          17              141   
+ mens activewear                l         111              526   
+ mens best brands               l        1404             9057   
+ mens contemporary              l        1436            11979   
+ mens furnishings               l         448             8241   
+ mens moderate sportswear       m         366             3411   
+ seasonal decorative          nan           0             9933   
+ table top                   10oz           6              166   
+ toys & books                 nan           0            20356   
+ treatment / color            nan           0           137650   
+ women's sizes                 1x         450             4247   
+ young mens                     l         117             1054   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                       350497.77                  365   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                38265.23                    0   
+ bedding                          408960.15                  300   
+ best brands casual               205870.54                   83   
+ casual wear                      117106.02                  123   
+ children's accessories            55629.09                    0   
+ contemporary                     560466.99                  208   
+ decorative textiles              220063.23                  194   
+ dresses/ladies suits             786532.96                  215   
+ fragrances                       277921.93                    0   
+ gourmet housewares                25742.32                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories            1062022.73                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                    59742.64                   92   
+ junior drs/swtr/jkt               94577.93                  123   
+ junior sportswear                 61498.66                   93   
+ knitwear                         240437.97                  205   
+ ladies footwear                  815711.64                  229   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle               122968.00                  171   
+ mens accessories/giftware          2356.25                    2   
+ mens activewear                   10397.46                    4   
+ mens best brands                 170924.86                  162   
+ mens contemporary                254001.72                  136   
+ mens furnishings                 114886.28                  170   
+ mens moderate sportswear          48711.07                   19   
+ seasonal decorative               87657.45                    0   
+ table top                          8278.34                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                     87454.61                   91   
+ young mens                        12793.51                   19   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.198592        0.199224   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.000000        0.000000   
+ bedding                             0.138392        0.323996   
+ best brands casual                  0.146738        0.079012   
+ casual wear                         0.128832        0.123494   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.119801        0.086892   
+ decorative textiles                 0.095038        0.261044   
+ dresses/ladies suits                0.138364        0.134577   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.037313        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.000000        0.000000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.106721        0.113727   
+ junior drs/swtr/jkt                 0.074571        0.439068   
+ junior sportswear                   0.168790        0.199099   
+ knitwear                            0.145475        0.680391   
+ ladies footwear                     0.114909        0.160211   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.249378        0.103969   
+ mens accessories/giftware           0.120567        0.117647   
+ mens activewear                     0.207596        0.152958   
+ mens best brands                    0.244719        0.216857   
+ mens contemporary                   0.228549        0.064635   
+ mens furnishings                    0.056172        0.232610   
+ mens moderate sportswear            0.102937        0.218280   
+ seasonal decorative                 0.000000        0.000000   
+ table top                           0.036145        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.115767        0.092350   
+ young mens                          0.123137        0.107955   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                              110.677563  
+ bath  body  hair                               NaN  
+ bath shop/textiles                     1249.950769  
+ bedding                                 450.525792  
+ best brands casual                      278.519813  
+ casual wear                             117.576325  
+ children's accessories                         inf  
+ contemporary                            366.639653  
+ decorative textiles                     268.672239  
+ dresses/ladies suits                    392.995726  
+ fragrances                                     NaN  
+ gourmet housewares                      429.038667  
+ haircare                                       NaN  
+ handbags/accessories                   3049.793333  
+ home furnishings                               NaN  
+ inf & toddlers                          175.986116  
+ junior drs/swtr/jkt                     262.590976  
+ junior sportswear                       144.943743  
+ knitwear                                155.901026  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                      177.245897  
+ mens accessories/giftware               138.602941  
+ mens activewear                         139.848988  
+ mens best brands                         92.297125  
+ mens contemporary                       201.022415  
+ mens furnishings                        266.918019  
+ mens moderate sportswear                188.136509  
+ seasonal decorative                      23.458824  
+ table top                              1379.723333  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                           202.217178  
+ young mens                               47.516250  ,
+                                   Size  Units Sold  Inventory Units  \
+ Department                                                            
+ activewear                         xst           2                2   
+ bath  body  hair                   nan           0            52122   
+ bath shop/textiles               16x90           1               13   
+ bedding                    double/full           1               24   
+ best brands casual                  24           1                1   
+ casual wear                      28x28           0                1   
+ children's accessories             nan           0             3791   
+ contemporary                        34           2               11   
+ decorative textiles               8x12           7                4   
+ dresses/ladies suits                22           0                1   
+ fragrances                         nan           0             9802   
+ gourmet housewares                16oz          18               84   
+ haircare                           nan           0            16869   
+ handbags/accessories                38           0                2   
+ home furnishings                   nan           0            10594   
+ inf & toddlers                   6-12m           4               23   
+ junior drs/swtr/jkt                 xl         139              437   
+ junior sportswear                27/32           2                2   
+ knitwear                           xxl           2               18   
+ ladies footwear                10.5 2e           0                2   
+ luggage/accessories                nan           0            10971   
+ men & womens athle                5.5w           0                1   
+ mens accessories/giftware           36           2                8   
+ mens activewear                     xs           1                1   
+ mens best brands                    42           2                2   
+ mens contemporary                28x32           0                2   
+ mens furnishings              17x34/35           0                5   
+ mens moderate sportswear         33x29           1                1   
+ seasonal decorative                 10          17               20   
+ table top                         15oz           9                9   
+ toys & books                       nan           0            20356   
+ treatment / color                  nan           0           137650   
+ women's sizes                    14/xs           8               25   
+ young mens                          40           1                1   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                           31.00                    2   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                  151.80                    1   
+ bedding                             959.76                    0   
+ best brands casual                   19.99                    0   
+ casual wear                          12.50                    0   
+ children's accessories            55629.09                    0   
+ contemporary                        263.45                    0   
+ decorative textiles                  49.47                    0   
+ dresses/ladies suits                109.99                    0   
+ fragrances                       277921.93                    0   
+ gourmet housewares                 1639.56                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories                197.99                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                      288.38                    0   
+ junior drs/swtr/jkt                8831.67                    0   
+ junior sportswear                    26.24                    0   
+ knitwear                            344.83                    0   
+ ladies footwear                      27.49                    0   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle                   38.99                    0   
+ mens accessories/giftware           109.20                    2   
+ mens activewear                      12.99                    0   
+ mens best brands                     36.24                    0   
+ mens contemporary                    89.99                    0   
+ mens furnishings                    119.95                    0   
+ mens moderate sportswear             14.99                    0   
+ seasonal decorative                 398.80                    0   
+ table top                           126.67                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                       240.50                    8   
+ young mens                            9.99                    0   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          1.000000             1.0   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.076923             1.0   
+ bedding                             0.041667             0.0   
+ best brands casual                  1.000000             0.0   
+ casual wear                         0.000000             0.0   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.200000             0.0   
+ decorative textiles                 1.750000             0.0   
+ dresses/ladies suits                0.000000             0.0   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.214286             0.0   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.000000             0.0   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.173913             0.0   
+ junior drs/swtr/jkt                 0.241627             0.0   
+ junior sportswear                   1.000000             0.0   
+ knitwear                            0.111111             0.0   
+ ladies footwear                     0.000000             0.0   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.000000             1.0   
+ mens accessories/giftware           0.250000             1.0   
+ mens activewear                     1.000000             0.0   
+ mens best brands                    1.000000             0.0   
+ mens contemporary                   0.000000             0.0   
+ mens furnishings                    0.000000             0.0   
+ mens moderate sportswear            1.000000             0.0   
+ seasonal decorative                 0.850000             0.0   
+ table top                           1.000000             0.0   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.320000             1.0   
+ young mens                          1.000000             0.0   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                               15.500000  
+ bath  body  hair                               NaN  
+ bath shop/textiles                      151.800000  
+ bedding                                 959.760000  
+ best brands casual                       19.990000  
+ casual wear                                    inf  
+ children's accessories                         inf  
+ contemporary                                   inf  
+ decorative textiles                       7.067143  
+ dresses/ladies suits                           inf  
+ fragrances                                     NaN  
+ gourmet housewares                       91.086667  
+ haircare                                       NaN  
+ handbags/accessories                           inf  
+ home furnishings                               NaN  
+ inf & toddlers                           72.095000  
+ junior drs/swtr/jkt                     120.459632  
+ junior sportswear                        13.120000  
+ knitwear                                172.415000  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                             inf  
+ mens accessories/giftware                54.600000  
+ mens activewear                          12.990000  
+ mens best brands                         18.120000  
+ mens contemporary                              inf  
+ mens furnishings                               inf  
+ mens moderate sportswear                 14.990000  
+ seasonal decorative                      23.458824  
+ table top                                14.074444  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                            30.062500  
+ young mens                                9.990000  ,
+                                     Size  Units Sold  Inventory Units  \
+ Department                                                              
+ activewear                          xxlt           2                2   
+ bath  body  hair                     nan           0            52122   
+ bath shop/textiles                 20x30         234              533   
+ bedding                             full          58              234   
+ best brands casual                    25           3                3   
+ casual wear                           36           4                4   
+ children's accessories               nan           0             3791   
+ contemporary                           8          46              240   
+ decorative textiles                 8x12           7                4   
+ dresses/ladies suits                 18p           8                6   
+ fragrances                           nan           0             9802   
+ gourmet housewares                  16oz          18               84   
+ haircare                             nan           0            16869   
+ handbags/accessories                  48           2                2   
+ home furnishings                     nan           0            10594   
+ inf & toddlers                    12-18m          74              623   
+ junior drs/swtr/jkt                   xl         139              437   
+ junior sportswear                  25/27          12               12   
+ knitwear                              xl         661             3308   
+ ladies footwear                     39.5          15               13   
+ luggage/accessories                  nan           0            10971   
+ men & womens athle         11-11.5/42 eu           2                1   
+ mens accessories/giftware             32           5               12   
+ mens activewear                       xs           1                1   
+ mens best brands                      42           2                2   
+ mens contemporary                     29           4                4   
+ mens furnishings                16x34/35           6                6   
+ mens moderate sportswear             2xl          21               75   
+ seasonal decorative                   10          17               20   
+ table top                           15oz           9                9   
+ toys & books                         nan           0            20356   
+ treatment / color                    nan           0           137650   
+ women's sizes                        xxl          14               31   
+ young mens                            40           1                1   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                           32.00                    2   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                 6403.93                    0   
+ bedding                            6732.11                    7   
+ best brands casual                   74.97                    0   
+ casual wear                          77.47                    0   
+ children's accessories            55629.09                    0   
+ contemporary                      11431.71                    1   
+ decorative textiles                  49.47                    0   
+ dresses/ladies suits                526.44                    0   
+ fragrances                       277921.93                    0   
+ gourmet housewares                 1639.56                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories                233.99                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                     6783.67                    0   
+ junior drs/swtr/jkt                8831.67                    0   
+ junior sportswear                   287.39                    0   
+ knitwear                          57900.50                   49   
+ ladies footwear                    4441.88                    0   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle                   54.99                    0   
+ mens accessories/giftware           159.79                    5   
+ mens activewear                      12.99                    0   
+ mens best brands                     36.24                    0   
+ mens contemporary                   174.97                    0   
+ mens furnishings                    129.95                    0   
+ mens moderate sportswear           2219.26                    0   
+ seasonal decorative                 398.80                    0   
+ table top                           126.67                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                      1549.69                    0   
+ young mens                            9.99                    0   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          1.000000        1.000000   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.366099        0.000000   
+ bedding                             0.376685        0.064815   
+ best brands casual                  1.000000        0.000000   
+ casual wear                         1.000000        0.000000   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.434991        0.008065   
+ decorative textiles                 1.750000        0.000000   
+ dresses/ladies suits                1.333333        0.000000   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.214286        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                1.000000        0.000000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.339971        0.000000   
+ junior drs/swtr/jkt                 0.241627        0.000000   
+ junior sportswear                   1.000000        0.000000   
+ knitwear                            0.263256        0.452146   
+ ladies footwear                     1.111111        0.000000   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  2.000000        0.000000   
+ mens accessories/giftware           0.416667        1.000000   
+ mens activewear                     1.000000        0.000000   
+ mens best brands                    1.000000        0.000000   
+ mens contemporary                   1.000000        0.000000   
+ mens furnishings                    1.000000        0.000000   
+ mens moderate sportswear            6.060811        0.000000   
+ seasonal decorative                 0.850000        0.000000   
+ table top                           1.000000        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.451613        0.000000   
+ young mens                          1.000000        0.000000   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                               16.000000  
+ bath  body  hair                               NaN  
+ bath shop/textiles                       41.748218  
+ bedding                                 149.346706  
+ best brands casual                       24.990000  
+ casual wear                              19.367500  
+ children's accessories                         inf  
+ contemporary                                   inf  
+ decorative textiles                       7.067143  
+ dresses/ladies suits                     65.805000  
+ fragrances                                     NaN  
+ gourmet housewares                       91.086667  
+ haircare                                       NaN  
+ handbags/accessories                    116.995000  
+ home furnishings                               NaN  
+ inf & toddlers                           86.441582  
+ junior drs/swtr/jkt                     120.459632  
+ junior sportswear                        23.949167  
+ knitwear                                 77.801469  
+ ladies footwear                         483.651250  
+ luggage/accessories                            NaN  
+ men & womens athle                       27.495000  
+ mens accessories/giftware                31.958000  
+ mens activewear                          12.990000  
+ mens best brands                         18.120000  
+ mens contemporary                        43.742500  
+ mens furnishings                         21.658333  
+ mens moderate sportswear                123.084028  
+ seasonal decorative                      23.458824  
+ table top                                14.074444  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                           110.692143  
+ young mens                                9.990000  ,
+                                  Size  Units Sold  Inventory Units  \
+ Department                                                           
+ activewear                      32a/b           0                5   
+ bath  body  hair                  nan           0            52122   
+ bath shop/textiles                nan           0             1033   
+ bedding                         70x50           0                2   
+ best brands casual               s/xs           1               46   
+ casual wear                     30x32           0               16   
+ children's accessories            nan           0             3791   
+ contemporary                      xxl           0               14   
+ decorative textiles               nan           0             3598   
+ dresses/ladies suits               22           0                1   
+ fragrances                        nan           0             9802   
+ gourmet housewares               25oz          15              960   
+ haircare                          nan           0            16869   
+ handbags/accessories               38           0                2   
+ home furnishings                  nan           0            10594   
+ inf & toddlers                     nb           2              135   
+ junior drs/swtr/jkt                 s         431             5063   
+ junior sportswear               25/32           0                9   
+ knitwear                           xs         274             3843   
+ ladies footwear                   11n           0               10   
+ luggage/accessories               nan           0            10971   
+ men & womens athle                 5w           0                6   
+ mens accessories/giftware          60           0                2   
+ mens activewear                    xl          32              242   
+ mens best brands                   37           0               12   
+ mens contemporary               29x32           0                4   
+ mens furnishings           16.5x32/33           0                9   
+ mens moderate sportswear        34x27           0               15   
+ seasonal decorative               nan           0             9933   
+ table top                        11oz           0               21   
+ toys & books                      nan           0            20356   
+ treatment / color                 nan           0           137650   
+ women's sizes                     26w           0               58   
+ young mens                         xs           0               19   
+ 
+                            Inventory Value  Markdown Units Sold  \
+ Department                                                        
+ activewear                          122.45                    0   
+ bath  body  hair                 384358.66                    0   
+ bath shop/textiles                38265.23                    0   
+ bedding                            2464.98                    0   
+ best brands casual                 2918.40                    1   
+ casual wear                         263.35                    0   
+ children's accessories            55629.09                    0   
+ contemporary                        299.20                    0   
+ decorative textiles              139629.11                    0   
+ dresses/ladies suits                109.99                    0   
+ fragrances                       277921.93                    0   
+ gourmet housewares                23990.40                    0   
+ haircare                         265394.00                    0   
+ handbags/accessories                197.99                    0   
+ home furnishings                2008071.82                    0   
+ inf & toddlers                     2340.96                    0   
+ junior drs/swtr/jkt               94577.93                  123   
+ junior sportswear                   209.92                    0   
+ knitwear                          68730.19                   38   
+ ladies footwear                     302.16                    0   
+ luggage/accessories             1281286.27                    0   
+ men & womens athle                  258.94                    0   
+ mens accessories/giftware           314.99                    0   
+ mens activewear                    4672.96                    2   
+ mens best brands                    313.60                    0   
+ mens contemporary                   239.97                    0   
+ mens furnishings                    224.91                    0   
+ mens moderate sportswear            289.86                    0   
+ seasonal decorative               87657.45                    0   
+ table top                          1259.79                    0   
+ toys & books                     333992.35                    0   
+ treatment / color               2159747.15                    0   
+ women's sizes                      1626.17                    0   
+ young mens                          235.77                    0   
+ 
+                            Sell-through Rate  Markdown Ratio  \
+ Department                                                     
+ activewear                          0.000000        0.363636   
+ bath  body  hair                    0.000000             NaN   
+ bath shop/textiles                  0.000000        1.000000   
+ bedding                             0.000000        0.000000   
+ best brands casual                  0.021739        1.000000   
+ casual wear                         0.000000        0.000000   
+ children's accessories              0.000000             NaN   
+ contemporary                        0.000000        0.399471   
+ decorative textiles                 0.000000        1.000000   
+ dresses/ladies suits                0.000000        0.161538   
+ fragrances                          0.000000             NaN   
+ gourmet housewares                  0.015625        0.000000   
+ haircare                            0.000000             NaN   
+ handbags/accessories                0.000000        0.000000   
+ home furnishings                    0.000000             NaN   
+ inf & toddlers                      0.037037        0.000000   
+ junior drs/swtr/jkt                 0.074571        0.439068   
+ junior sportswear                   0.000000        0.000000   
+ knitwear                            0.083704        0.453148   
+ ladies footwear                     0.000000        0.000000   
+ luggage/accessories                 0.000000             NaN   
+ men & womens athle                  0.000000        1.000000   
+ mens accessories/giftware           0.000000        0.666667   
+ mens activewear                     0.131630        0.083333   
+ mens best brands                    0.000000        0.000000   
+ mens contemporary                   0.000000        0.333333   
+ mens furnishings                    0.000000        0.000000   
+ mens moderate sportswear            0.000000        0.000000   
+ seasonal decorative                 0.000000        0.000000   
+ table top                           0.000000        0.000000   
+ toys & books                        0.000000             NaN   
+ treatment / color                   0.000000             NaN   
+ women's sizes                       0.000000        0.000000   
+ young mens                          0.000000        0.000000   
+ 
+                            Inventory per Unit Sold  
+ Department                                          
+ activewear                                     inf  
+ bath  body  hair                               NaN  
+ bath shop/textiles                      997.500000  
+ bedding                                        inf  
+ best brands casual                     2918.400000  
+ casual wear                                    inf  
+ children's accessories                         inf  
+ contemporary                                   inf  
+ decorative textiles                            inf  
+ dresses/ladies suits                           inf  
+ fragrances                                     NaN  
+ gourmet housewares                     1599.360000  
+ haircare                                       NaN  
+ handbags/accessories                           inf  
+ home furnishings                               NaN  
+ inf & toddlers                          150.822175  
+ junior drs/swtr/jkt                     262.590976  
+ junior sportswear                              inf  
+ knitwear                                200.836979  
+ ladies footwear                                inf  
+ luggage/accessories                            NaN  
+ men & womens athle                             inf  
+ mens accessories/giftware                      inf  
+ mens activewear                         143.631333  
+ mens best brands                               inf  
+ mens contemporary                              inf  
+ mens furnishings                               inf  
+ mens moderate sportswear                       inf  
+ seasonal decorative                      23.458824  
+ table top                                      inf  
+ toys & books                                   NaN  
+ treatment / color                              NaN  
+ women's sizes                          1325.750000  
+ young mens                                     inf  )
+# Get the best and worst sizes per department based on 'Units Sold'
+best_sizes_sales = dept_size_summary.loc[dept_size_summary.groupby('Department')['Units Sold'].idxmax()]
+worst_sizes_sales = dept_size_summary.loc[dept_size_summary.groupby('Department')['Units Sold'].idxmin()]
+
+# Get the best and worst sizes per department based on 'Markdown Units Sold'
+best_sizes_markdown = dept_size_summary.loc[dept_size_summary.groupby('Department')['Markdown Units Sold'].idxmax()]
+worst_sizes_markdown = dept_size_summary.loc[dept_size_summary.groupby('Department')['Markdown Units Sold'].idxmin()]
+
+# Get the best and worst sizes per department based on 'Inventory Value'
+best_sizes_inventory = dept_size_summary.loc[dept_size_summary.groupby('Department')['Inventory Value'].idxmax()]
+worst_sizes_inventory = dept_size_summary.loc[dept_size_summary.groupby('Department')['Inventory Value'].idxmin()]
+
+# Get the best and worst sizes per department based on 'Sell-through Rate'
+best_sizes_sell_through = dept_size_summary.loc[dept_size_summary.groupby('Department')['Sell-through Rate'].idxmax()]
+worst_sizes_sell_through = dept_size_summary.loc[dept_size_summary.groupby('Department')['Sell-through Rate'].idxmin()]
+
+best_sizes_sales, worst_sizes_sales, best_sizes_markdown, worst_sizes_markdown, best_sizes_inventory, worst_sizes_inventory, best_sizes_sell_through, worst_sizes_sell_through
+
+
+# Import necessary libraries for visualization
+import matplotlib.pyplot as plt
+
+# Creating the plots
+fig, axs = plt.subplots(5, figsize=(12, 40))
+
+# Plot for the inventory size balance vs. sales
+worst_sizes_inventory.plot(kind='barh', x='Department', y='Inventory Value', ax=axs[0], color='blue', legend=False)
+axs[0].set_title('Inventory to Sales Ratio')
+axs[0].set_xlabel('Inventory per Unit Sold')
+
+# Plot for sales performance of each size per department
+best_sizes_sales.plot(kind='barh', x='Department', y='Units Sold', ax=axs[1], color='green', legend=False)
+worst_sizes_sales.plot(kind='barh', x='Department', y='Units Sold', ax=axs[1], color='red', legend=False)
+axs[1].set_title('Best and Worst Sales Performance per Department')
+axs[1].set_xlabel('Units Sold')
+axs[1].legend(['Best', 'Worst'])
+
+# Plot for sizes most often sold at a markdown per department
+best_sizes_markdown.plot(kind='barh', x='Department', y='Markdown Units Sold', ax=axs[2], color='purple', legend=False)
+axs[2].set_title('Markdown Sales per Department')
+axs[2].set_xlabel('Markdown Units Sold')
+
+# Plot for sizes that are rarely sold but have high inventory value per department
+worst_sizes_inventory.plot(kind='barh', x='Department', y='Inventory Value', ax=axs[3], color='orange', legend=False)
+axs[3].set_title('Inventory Value for Sizes Rarely Sold')
+axs[3].set_xlabel('Inventory Value')
+
+# Plot for sell-through rate for each size per department
+best_sizes_sell_through.plot(kind='barh', x='Department', y='Sell-through Rate', ax=axs[4], color='blue', legend=False)
+worst_sizes_sell_through.plot(kind='barh', x='Department', y='Sell-through Rate', ax=axs[4], color='red', legend=False)
+axs[4].set_title('Best and Worst Sell-through Rates per Department')
+axs[4].set_xlabel('Sell-through Rate')
+axs[4].legend(['Best', 'Worst'])
+
+# Adjusting layout
+fig.tight_layout()
+plt.show()
+No description has been provided for this image
+Please note that this analysis assumes that the sales are mainly driven by customer demand and that supply (inventory) should ideally match the demand. In reality, sales could also be influenced by other factors like pricing, marketing, seasonality, etc. Hence, before making any decisions on adjusting the inventory, it would be beneficial to also consider these factors and perhaps conduct a more in-depth analysis or experiment.
+
+Also note that when we analyze sales and calculate ratios like the sell-through rate or markdown ratio, we are normalizing the metrics relative to other variables (like inventory units or units sold). This allows us to make comparisons across departments of different sizes.
+
+As when we calculate the ratio of inventory units to units sold for each size within each department, we're actually normalizing for the size of the department. This is because we're looking at the relative balance between inventory and sales for each size within each department, rather than comparing absolute numbers.
+
+For example, when we calculate the sell-through rate (units sold divided by inventory units), we are measuring the proportion of inventory that has been sold. This is a relative measure and it allows us to compare the efficiency of sales across different departments, regardless of their size.
+
+Similarly, when we calculate the markdown ratio (markdown units sold divided by units sold), we are measuring the proportion of sales that resulted from markdowns. This ratio allows us to compare the effectiveness of markdown strategies across different departments, regardless of the total number of units they sold.
+
+However, it's important to note that while these ratios can help us compare departments of different sizes, they do not provide a complete picture. Larger departments may have more complex operations, greater overhead costs, or more bargaining power with suppliers. Smaller departments, on the other hand, might be more nimble, have less competition, or cater to a niche market. Therefore, these factors should also be considered in a comprehensive analysis.
+
